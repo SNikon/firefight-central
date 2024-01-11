@@ -13,6 +13,7 @@ edition = "2021"
 tauri-build = { version = "1.5", features = [] }
 
 [dependencies]
+firefight_macro = { path = "./firefight_macro" }
 aws-config = { version = "1.0.1", features = ["behavior-version-latest"] }
 aws-sdk-polly = { version = "1.3.0" }
 tauri = { version = "1.5", features = [ "updater", "shell-open"] }
@@ -23,6 +24,8 @@ window-shadows = "0.2.2"
 tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 anyhow = "1.0.79"
 rodio = "0.17.3"
+proc-macro2 = "1.0.76"
+uuid = { version = "1.6.1", features = ["v4"] }
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

@@ -1,33 +1,36 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod firefight;
 mod polly;
 mod torii;
 
 use anyhow::Result;
+use firefight::types::DataStore;
 use polly::client::create_polly_client;
 use polly::synthesize::synthesize_text;
 use rodio::{Decoder, OutputStream};
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager, State};
 use torii::audio;
-use std::{io::{BufReader}, fs::{File}};
+use std::{io::BufReader, fs::File, sync::Mutex, borrow::BorrowMut, ops::DerefMut};
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 async fn alarm(
     app_handle: AppHandle,
+    incident: String,
+    staff: Option<Vec<String>>,
     vehicles: Vec<String>,
-    situation: String
 ) -> Result<(), String> {
-    println!("Alarm command received, vehicles: {:?}, situation: {}", vehicles, situation);
-    let situation_value = String::from(situation.trim());
+    println!("Alarm command received, vehicles: {:?}, incident: {}", vehicles, incident);
+    let incident_value = String::from(incident.trim());
 
     let mut sorted_vehicles = vehicles.iter().map(|v| v.trim().to_uppercase()).collect::<Vec<String>>();
     sorted_vehicles.sort_unstable();
 
-    let mut situation_key_comp = vec![String::from("-sit-"), situation_value.clone()];
+    let mut incident_key_comp = vec![String::from("-sit-"), incident_value.clone()];
     let mut audio_key_comp = sorted_vehicles.clone();
-    audio_key_comp.append(&mut situation_key_comp);
+    audio_key_comp.append(&mut incident_key_comp);
     let audio_key = audio::get_string_hash(&audio_key_comp.join("-"));
 
     let mut cache_audio_result = audio::get_audio_from_cache(&app_handle, &audio_key);
@@ -38,7 +41,7 @@ async fn alarm(
         let polly_client = create_polly_client().await;
 
         let vehicles_cue = sorted_vehicles.into_iter().map(|v| format!("<say-as interpret-as=\"spell-out\">{}</say-as>", v)).collect::<Vec<String>>().join(", ");
-        let audio_cue = format!("<speak>Saída de {} para {}.</speak>", vehicles_cue, situation_value);
+        let audio_cue = format!("<speak>Saída de {} para {}.</speak>", vehicles_cue, incident_value);
         
         let synthesize_result = synthesize_text(&polly_client, &audio_cue).await;
         if synthesize_result.is_err() {
@@ -69,6 +72,15 @@ async fn alarm(
     Ok(())
 }
 
+#[tauri::command]
+async fn get_store(state: State<'_, Mutex<firefight::local_store::LocalStore>>) -> Result<DataStore, String> {
+    let mut state_mutex = state.lock().unwrap();
+    let state_mutex_ref = state_mutex.borrow_mut();
+    let state = state_mutex_ref.deref_mut();
+
+    Ok(firefight::local_store::get_data_store(state))
+}
+
 #[cfg(dev)]
 #[tauri::command]
 fn get_environment() -> String { String::from("development") }
@@ -78,9 +90,16 @@ fn get_environment() -> String { String::from("production") }
 
 fn main() {
     tauri::Builder::default()
+        .setup(|app| {
+            let store = firefight::local_store::create_store(app.app_handle());
+            app.manage(store);
+
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             alarm,
-            get_environment
+            get_environment,
+            get_store
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

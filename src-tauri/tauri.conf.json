@@ -47,6 +47,7 @@
       {
         "fullscreen": false,
         "resizable": true,
+        "maximized": true,
         "title": "Firefight Central",
         "width": 800,
         "height": 600
