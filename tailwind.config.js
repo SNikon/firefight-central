@@ -14,7 +14,8 @@ export default {
       backgroundEmphasis: colors.slate[950],
       button: colors.slate[600],
       buttonActive: colors.zinc[800],
-      primary: colors.yellow[400]
+      primary: colors.yellow[400],
+      primaryContrast: colors.slate[900],
     },
     extend: {},
   },

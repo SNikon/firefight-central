@@ -18,19 +18,19 @@ use std::{io::BufReader, fs::File, sync::Mutex, borrow::BorrowMut, ops::DerefMut
 #[tauri::command]
 async fn alarm(
     app_handle: AppHandle,
-    incident: String,
+    ocurrence: String,
     staff: Option<Vec<String>>,
     vehicles: Vec<String>,
 ) -> Result<(), String> {
-    println!("Alarm command received, vehicles: {:?}, incident: {}", vehicles, incident);
-    let incident_value = String::from(incident.trim());
+    println!("Alarm command received, vehicles: {:?}, ocurrence: {}", vehicles, ocurrence);
+    let ocurrence_value = String::from(ocurrence.trim());
 
     let mut sorted_vehicles = vehicles.iter().map(|v| v.trim().to_uppercase()).collect::<Vec<String>>();
     sorted_vehicles.sort_unstable();
 
-    let mut incident_key_comp = vec![String::from("-sit-"), incident_value.clone()];
+    let mut ocurrence_key_comp = vec![String::from("-sit-"), ocurrence_value.clone()];
     let mut audio_key_comp = sorted_vehicles.clone();
-    audio_key_comp.append(&mut incident_key_comp);
+    audio_key_comp.append(&mut ocurrence_key_comp);
     let audio_key = audio::get_string_hash(&audio_key_comp.join("-"));
 
     let mut cache_audio_result = audio::get_audio_from_cache(&app_handle, &audio_key);
@@ -41,7 +41,7 @@ async fn alarm(
         let polly_client = create_polly_client().await;
 
         let vehicles_cue = sorted_vehicles.into_iter().map(|v| format!("<say-as interpret-as=\"spell-out\">{}</say-as>", v)).collect::<Vec<String>>().join(", ");
-        let audio_cue = format!("<speak>Saída de {} para {}.</speak>", vehicles_cue, incident_value);
+        let audio_cue = format!("<speak>Saída de {} para {}.</speak>", vehicles_cue, ocurrence_value);
         
         let synthesize_result = synthesize_text(&polly_client, &audio_cue).await;
         if synthesize_result.is_err() {

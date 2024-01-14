@@ -3,7 +3,7 @@ use anyhow::Context;
 use tauri::AppHandle;
 use tauri_plugin_store::StoreBuilder;
 
-use super::types::{DataStore, Vehicle, ActiveIncident, Staff, Incident, FirefightDataManager};
+use super::types::{DataStore, Vehicle, ActiveOcurrence, Staff, Ocurrence, FirefightDataManager};
 
 pub type LocalStore = tauri_plugin_store::Store<tauri::Wry>;
 
@@ -15,8 +15,8 @@ pub fn create_store(app_handle: AppHandle) -> LocalStore {
 		println!("Store not found {:?} - Using default.", load_error);
 
 		let default_store = DataStore::default();
-		if let Err(update_error) = firefight_store.insert(String::from("active_incidents"), serde_json::json!(default_store.active_incidents)) { println!("Failed to update store: {}", update_error); }
-		if let Err(update_error) = firefight_store.insert(String::from("incidents"), serde_json::json!(default_store.incidents)) { println!("Failed to update store: {}", update_error); }
+		if let Err(update_error) = firefight_store.insert(String::from("active_ocurrences"), serde_json::json!(default_store.active_ocurrences)) { println!("Failed to update store: {}", update_error); }
+		if let Err(update_error) = firefight_store.insert(String::from("ocurrences"), serde_json::json!(default_store.ocurrences)) { println!("Failed to update store: {}", update_error); }
 		if let Err(update_error) = firefight_store.insert(String::from("staff"), serde_json::json!(default_store.staff)) { println!("Failed to update store: {}", update_error); }
 		if let Err(update_error) = firefight_store.insert(String::from("vehicles"), serde_json::json!(default_store.vehicles)) { println!("Failed to update store: {}", update_error); }
 		
@@ -28,78 +28,78 @@ pub fn create_store(app_handle: AppHandle) -> LocalStore {
 
 pub fn get_data_store(state: &mut LocalStore) -> DataStore {
 	DataStore {
-		active_incidents: serde_json::from_value(state.get("active_incidents").unwrap().clone()).unwrap(),
-		incidents: serde_json::from_value(state.get("incidents").unwrap().clone()).unwrap(),
+		active_ocurrences: serde_json::from_value(state.get("active_ocurrences").unwrap().clone()).unwrap(),
+		ocurrences: serde_json::from_value(state.get("ocurrences").unwrap().clone()).unwrap(),
 		staff: serde_json::from_value(state.get("staff").unwrap().clone()).unwrap(),
 		vehicles: serde_json::from_value(state.get("vehicles").unwrap().clone()).unwrap(),
 	}
 }
 
 impl FirefightDataManager for LocalStore {
-    fn get_active_incident(&self, incident_id: String) -> anyhow::Result<ActiveIncident> {
-		let active_incidents_value = self.get("active_incidents").with_context(|| format!("Unable to read active incidents from store"))?.clone();
-		let active_incident_store = serde_json::from_value::<HashMap<String, ActiveIncident>>(active_incidents_value).with_context(|| format!("Failed to deserialize active incidents"))?;
+    fn get_active_ocurrence(&self, ocurrence_id: String) -> anyhow::Result<ActiveOcurrence> {
+		let active_ocurrences_value = self.get("active_ocurrences").with_context(|| format!("Unable to read active ocurrences from store"))?.clone();
+		let active_ocurrence_store = serde_json::from_value::<HashMap<String, ActiveOcurrence>>(active_ocurrences_value).with_context(|| format!("Failed to deserialize active ocurrences"))?;
 
-		let found_value = active_incident_store.get(&incident_id).cloned().with_context(|| format!("No active incident found with id: {}", incident_id))?;
+		let found_value = active_ocurrence_store.get(&ocurrence_id).cloned().with_context(|| format!("No active ocurrence found with id: {}", ocurrence_id))?;
 		Ok(found_value)
     }
 
-    fn get_active_incident_by_staff(&self, staff_id: String) -> anyhow::Result<ActiveIncident> {
-		let active_incidents_value = self.get("active_incidents").with_context(|| format!("Unable to read active incidents from store"))?.clone();
-		let active_incident_store = serde_json::from_value::<HashMap<String, ActiveIncident>>(active_incidents_value).with_context(|| format!("Failed to deserialize active incidents"))?;
+    fn get_active_ocurrence_by_staff(&self, staff_id: String) -> anyhow::Result<ActiveOcurrence> {
+		let active_ocurrences_value = self.get("active_ocurrences").with_context(|| format!("Unable to read active ocurrences from store"))?.clone();
+		let active_ocurrence_store = serde_json::from_value::<HashMap<String, ActiveOcurrence>>(active_ocurrences_value).with_context(|| format!("Failed to deserialize active ocurrences"))?;
 
-		let found_value = active_incident_store.values()
-			.find(|active_incident| active_incident.staff_id.contains(&staff_id))
+		let found_value = active_ocurrence_store.values()
+			.find(|active_ocurrence| active_ocurrence.staff_ids.contains(&staff_id))
 			.cloned()
-			.with_context(|| format!("No active incident found with staff id: {}", staff_id))?;
+			.with_context(|| format!("No active ocurrence found with staff id: {}", staff_id))?;
 
 		Ok(found_value)
     }
 
-    fn get_active_incident_by_vehicle(&self, vehicle_id: String) -> anyhow::Result<ActiveIncident> {
-		let active_incidents_value = self.get("active_incidents").with_context(|| format!("Unable to read active incidents from store"))?.clone();
-		let active_incident_store = serde_json::from_value::<HashMap<String, ActiveIncident>>(active_incidents_value).with_context(|| format!("Failed to deserialize active incidents"))?;
+    fn get_active_ocurrence_by_vehicle(&self, vehicle_id: String) -> anyhow::Result<ActiveOcurrence> {
+		let active_ocurrences_value = self.get("active_ocurrences").with_context(|| format!("Unable to read active ocurrences from store"))?.clone();
+		let active_ocurrence_store = serde_json::from_value::<HashMap<String, ActiveOcurrence>>(active_ocurrences_value).with_context(|| format!("Failed to deserialize active ocurrences"))?;
 
-		let found_value = active_incident_store.values()
-			.find(|active_incident| active_incident.vehicle_ids.contains(&vehicle_id))
+		let found_value = active_ocurrence_store.values()
+			.find(|active_ocurrence| active_ocurrence.vehicle_ids.contains(&vehicle_id))
 			.cloned()
-			.with_context(|| format!("No active incident found with vehicle id: {}", vehicle_id))?;
+			.with_context(|| format!("No active ocurrence found with vehicle id: {}", vehicle_id))?;
 
 		Ok(found_value)
 	}
 
-    fn get_active_incident_list(&self) -> anyhow::Result<Vec<ActiveIncident>> {
-		let active_incidents_value = self.get("active_incidents").with_context(|| format!("Unable to read active incidents from store"))?.clone();
-		let active_incident_store = serde_json::from_value::<HashMap<String, ActiveIncident>>(active_incidents_value).with_context(|| format!("Failed to deserialize active incidents"))?;
+    fn get_active_ocurrence_list(&self) -> anyhow::Result<Vec<ActiveOcurrence>> {
+		let active_ocurrences_value = self.get("active_ocurrences").with_context(|| format!("Unable to read active ocurrences from store"))?.clone();
+		let active_ocurrence_store = serde_json::from_value::<HashMap<String, ActiveOcurrence>>(active_ocurrences_value).with_context(|| format!("Failed to deserialize active ocurrences"))?;
 
-		Ok(active_incident_store.values().cloned().collect())
+		Ok(active_ocurrence_store.values().cloned().collect())
 	}
 
-    fn get_active_incident_list_by_incident(&self, incident_id: String) -> anyhow::Result<Vec<ActiveIncident>> {
-		let active_incidents_value = self.get("active_incidents").with_context(|| format!("Unable to read active incidents from store"))?.clone();
-		let active_incident_store = serde_json::from_value::<HashMap<String, ActiveIncident>>(active_incidents_value).with_context(|| format!("Failed to deserialize active incidents"))?;
+    fn get_active_ocurrence_list_by_ocurrence(&self, ocurrence_id: String) -> anyhow::Result<Vec<ActiveOcurrence>> {
+		let active_ocurrences_value = self.get("active_ocurrences").with_context(|| format!("Unable to read active ocurrences from store"))?.clone();
+		let active_ocurrence_store = serde_json::from_value::<HashMap<String, ActiveOcurrence>>(active_ocurrences_value).with_context(|| format!("Failed to deserialize active ocurrences"))?;
 
-		let found_values = active_incident_store.values()
-			.filter(|active_incident| active_incident.incident_id == incident_id)
+		let found_values = active_ocurrence_store.values()
+			.filter(|active_ocurrence| active_ocurrence.ocurrence_id == ocurrence_id)
 			.cloned()
-			.collect::<Vec<ActiveIncident>>();
+			.collect::<Vec<ActiveOcurrence>>();
 
 		Ok(found_values)
     }
 
-    fn get_incident(&self, incident_id: String) -> anyhow::Result<Incident> {
-		let incidents_value = self.get("incidents").with_context(|| format!("Unable to read incidents from store"))?.clone();
-		let incident_store = serde_json::from_value::<HashMap<String, Incident>>(incidents_value).with_context(|| format!("Failed to deserialize incidents"))?;
+    fn get_ocurrence(&self, ocurrence_id: String) -> anyhow::Result<Ocurrence> {
+		let ocurrences_value = self.get("ocurrences").with_context(|| format!("Unable to read ocurrences from store"))?.clone();
+		let ocurrence_store = serde_json::from_value::<HashMap<String, Ocurrence>>(ocurrences_value).with_context(|| format!("Failed to deserialize ocurrences"))?;
 
-		let found_value = incident_store.get(&incident_id).cloned().with_context(|| format!("No incident found with id: {}", incident_id))?;
+		let found_value = ocurrence_store.get(&ocurrence_id).cloned().with_context(|| format!("No ocurrence found with id: {}", ocurrence_id))?;
 		Ok(found_value)
     }
 
-    fn get_incident_list(&self) -> anyhow::Result<Vec<Incident>> {
-		let incidents_value = self.get("incidents").with_context(|| format!("Unable to read incidents from store"))?.clone();
-		let incident_store = serde_json::from_value::<HashMap<String, Incident>>(incidents_value).with_context(|| format!("Failed to deserialize incidents"))?;
+    fn get_ocurrence_list(&self) -> anyhow::Result<Vec<Ocurrence>> {
+		let ocurrences_value = self.get("ocurrences").with_context(|| format!("Unable to read ocurrences from store"))?.clone();
+		let ocurrence_store = serde_json::from_value::<HashMap<String, Ocurrence>>(ocurrences_value).with_context(|| format!("Failed to deserialize ocurrences"))?;
 
-		Ok(incident_store.values().cloned().collect())
+		Ok(ocurrence_store.values().cloned().collect())
 	}
 
     fn get_staff(&self, staff_id: String) -> anyhow::Result<Staff> {
@@ -132,30 +132,30 @@ impl FirefightDataManager for LocalStore {
 		Ok(found_value)
 	}
 
-    fn create_active_incident(&mut self, incident: ActiveIncident) -> anyhow::Result<String> {
-		let active_incidents_value = self.get("active_incidents").with_context(|| format!("Unable to read active incidents from store"))?.clone();
-		let mut active_incident_store = serde_json::from_value::<HashMap<String, ActiveIncident>>(active_incidents_value).with_context(|| format!("Failed to deserialize active incidents"))?;
+    fn create_active_ocurrence(&mut self, ocurrence: ActiveOcurrence) -> anyhow::Result<String> {
+		let active_ocurrences_value = self.get("active_ocurrences").with_context(|| format!("Unable to read active ocurrences from store"))?.clone();
+		let mut active_ocurrence_store = serde_json::from_value::<HashMap<String, ActiveOcurrence>>(active_ocurrences_value).with_context(|| format!("Failed to deserialize active ocurrences"))?;
 
-		let active_incident_id = uuid::Uuid::new_v4().to_string();
-		active_incident_store.insert(active_incident_id.clone(), incident);
+		let active_ocurrence_id = uuid::Uuid::new_v4().to_string();
+		active_ocurrence_store.insert(active_ocurrence_id.clone(), ocurrence);
 
-		self.insert(String::from("active_incidents"), serde_json::json!(active_incident_store)).with_context(|| format!("Failed to create active incident {} with value {:?}", &active_incident_id, active_incident_store.get(&active_incident_id)))?;
-		self.save().with_context(|| format!("Failed to save store while creating active incident"))?;
+		self.insert(String::from("active_ocurrences"), serde_json::json!(active_ocurrence_store)).with_context(|| format!("Failed to create active ocurrence {} with value {:?}", &active_ocurrence_id, active_ocurrence_store.get(&active_ocurrence_id)))?;
+		self.save().with_context(|| format!("Failed to save store while creating active ocurrence"))?;
 
-		Ok(active_incident_id)
+		Ok(active_ocurrence_id)
     }
 
-    fn create_incident(&mut self, incident: Incident) -> anyhow::Result<String> {
-		let incidents_value = self.get("incidents").with_context(|| format!("Unable to read incidents from store"))?.clone();
-		let mut incident_store = serde_json::from_value::<HashMap<String, Incident>>(incidents_value).with_context(|| format!("Failed to deserialize incidents"))?;
+    fn create_ocurrence(&mut self, ocurrence: Ocurrence) -> anyhow::Result<String> {
+		let ocurrences_value = self.get("ocurrences").with_context(|| format!("Unable to read ocurrences from store"))?.clone();
+		let mut ocurrence_store = serde_json::from_value::<HashMap<String, Ocurrence>>(ocurrences_value).with_context(|| format!("Failed to deserialize ocurrences"))?;
 
-		let incident_id = uuid::Uuid::new_v4().to_string();
-		incident_store.insert(incident_id.clone(), incident);
+		let ocurrence_id = uuid::Uuid::new_v4().to_string();
+		ocurrence_store.insert(ocurrence_id.clone(), ocurrence);
 
-		self.insert(String::from("incidents"), serde_json::json!(incident_store)).with_context(|| format!("Failed to create incident {} with value {:?}", &incident_id, incident_store.get(&incident_id)))?;
-		self.save().with_context(|| format!("Failed to save store while creating incident"))?;
+		self.insert(String::from("ocurrences"), serde_json::json!(ocurrence_store)).with_context(|| format!("Failed to create ocurrence {} with value {:?}", &ocurrence_id, ocurrence_store.get(&ocurrence_id)))?;
+		self.save().with_context(|| format!("Failed to save store while creating ocurrence"))?;
 
-		Ok(incident_id)
+		Ok(ocurrence_id)
     }
 
     fn create_staff(&mut self, staff: Staff) -> anyhow::Result<String> {
@@ -184,26 +184,26 @@ impl FirefightDataManager for LocalStore {
 		Ok(vehicle_id)
 	}
 
-    fn update_active_incident(&mut self, active_incident_id: String, active_incident: ActiveIncident) -> anyhow::Result<()> {
-		let active_incidents_value = self.get("active_incidents").with_context(|| format!("Unable to read active incidents from store"))?.clone();
-		let mut active_incident_store = serde_json::from_value::<HashMap<String, ActiveIncident>>(active_incidents_value).with_context(|| format!("Failed to deserialize active incidents"))?;
+    fn update_active_ocurrence(&mut self, active_ocurrence_id: String, active_ocurrence: ActiveOcurrence) -> anyhow::Result<()> {
+		let active_ocurrences_value = self.get("active_ocurrences").with_context(|| format!("Unable to read active ocurrences from store"))?.clone();
+		let mut active_ocurrence_store = serde_json::from_value::<HashMap<String, ActiveOcurrence>>(active_ocurrences_value).with_context(|| format!("Failed to deserialize active ocurrences"))?;
 
-		active_incident_store.insert(active_incident_id.clone(), active_incident);
+		active_ocurrence_store.insert(active_ocurrence_id.clone(), active_ocurrence);
 
-		self.insert(String::from("active_incidents"), serde_json::json!(active_incident_store)).with_context(|| format!("Failed to update active incident {} with value {:?}", active_incident_id, active_incident_store.get(&active_incident_id).unwrap()))?;
-		self.save().with_context(|| format!("Failed to save store while updating active incident"))?;
+		self.insert(String::from("active_ocurrences"), serde_json::json!(active_ocurrence_store)).with_context(|| format!("Failed to update active ocurrence {} with value {:?}", active_ocurrence_id, active_ocurrence_store.get(&active_ocurrence_id).unwrap()))?;
+		self.save().with_context(|| format!("Failed to save store while updating active ocurrence"))?;
 
 		Ok(())
     }
 
-    fn update_incident(&mut self, incident_id: String, incident: Incident) -> anyhow::Result<()> {
-		let incident_value = self.get("incidents").with_context(|| format!("Unable to read incidents from store"))?.clone();
-		let mut incident_store = serde_json::from_value::<HashMap<String, Incident>>(incident_value).with_context(|| format!("Failed to deserialize incidents"))?;
+    fn update_ocurrence(&mut self, ocurrence_id: String, ocurrence: Ocurrence) -> anyhow::Result<()> {
+		let ocurrence_value = self.get("ocurrences").with_context(|| format!("Unable to read ocurrences from store"))?.clone();
+		let mut ocurrence_store = serde_json::from_value::<HashMap<String, Ocurrence>>(ocurrence_value).with_context(|| format!("Failed to deserialize ocurrences"))?;
 
-		incident_store.insert(incident_id.clone(), incident);
+		ocurrence_store.insert(ocurrence_id.clone(), ocurrence);
 
-		self.insert(String::from("incidents"), serde_json::json!(incident_store)).with_context(|| format!("Failed to update incident {} with value {:?}", &incident_id, incident_store.get(&incident_id).unwrap()))?;
-		self.save().with_context(|| format!("Failed to save store while updating incident"))?;
+		self.insert(String::from("ocurrences"), serde_json::json!(ocurrence_store)).with_context(|| format!("Failed to update ocurrence {} with value {:?}", &ocurrence_id, ocurrence_store.get(&ocurrence_id).unwrap()))?;
+		self.save().with_context(|| format!("Failed to save store while updating ocurrence"))?;
 
 		Ok(())
     }
@@ -232,26 +232,26 @@ impl FirefightDataManager for LocalStore {
 		Ok(())
     }
 
-    fn delete_active_incident(&mut self, active_incident_id: String) -> anyhow::Result<()> {
-		let active_incident_value = self.get("active_incidents").with_context(|| format!("Unable to read active incidents from store"))?.clone();
-		let mut active_incident_store = serde_json::from_value::<HashMap<String, ActiveIncident>>(active_incident_value).with_context(|| format!("Failed to deserialize active incidents"))?;
+    fn delete_active_ocurrence(&mut self, active_ocurrence_id: String) -> anyhow::Result<()> {
+		let active_ocurrence_value = self.get("active_ocurrences").with_context(|| format!("Unable to read active ocurrences from store"))?.clone();
+		let mut active_ocurrence_store = serde_json::from_value::<HashMap<String, ActiveOcurrence>>(active_ocurrence_value).with_context(|| format!("Failed to deserialize active ocurrences"))?;
 
-		active_incident_store.remove(&active_incident_id);
+		active_ocurrence_store.remove(&active_ocurrence_id);
 
-		self.insert(String::from("active_incidents"), serde_json::json!(active_incident_store)).with_context(|| format!("Failed to delete active incident {}", active_incident_id))?;
-		self.save().with_context(|| format!("Failed to save store while deleting active incident"))?;
+		self.insert(String::from("active_ocurrences"), serde_json::json!(active_ocurrence_store)).with_context(|| format!("Failed to delete active ocurrence {}", active_ocurrence_id))?;
+		self.save().with_context(|| format!("Failed to save store while deleting active ocurrence"))?;
 
 		Ok(())
     }
 
-    fn delete_incident(&mut self, incident_id: String) -> anyhow::Result<()> {
-		let incident_value = self.get("incidents").with_context(|| format!("Unable to read incidents from store"))?.clone();
-		let mut incident_store = serde_json::from_value::<HashMap<String, Incident>>(incident_value).with_context(|| format!("Failed to deserialize incidents"))?;
+    fn delete_ocurrence(&mut self, ocurrence_id: String) -> anyhow::Result<()> {
+		let ocurrence_value = self.get("ocurrences").with_context(|| format!("Unable to read ocurrences from store"))?.clone();
+		let mut ocurrence_store = serde_json::from_value::<HashMap<String, Ocurrence>>(ocurrence_value).with_context(|| format!("Failed to deserialize ocurrences"))?;
 
-		incident_store.remove(&incident_id);
+		ocurrence_store.remove(&ocurrence_id);
 
-		self.insert(String::from("incidents"), serde_json::json!(incident_store)).with_context(|| format!("Failed to delete incident {}", incident_id))?;
-		self.save().with_context(|| format!("Failed to save store while deleting incident"))?;
+		self.insert(String::from("ocurrences"), serde_json::json!(ocurrence_store)).with_context(|| format!("Failed to delete ocurrence {}", ocurrence_id))?;
+		self.save().with_context(|| format!("Failed to save store while deleting ocurrence"))?;
 
 		Ok(())
 	}
