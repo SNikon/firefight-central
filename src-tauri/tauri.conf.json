@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "Firefight Central",
-    "version": "0.0.0"
+    "version": "0.0.5"
   },
   "tauri": {
     "allowlist": {
@@ -38,7 +38,7 @@
         "https://firebasestorage.googleapis.com/v0/b/torii-firefight.appspot.com/o/update_manifest.json?alt=media"
       ],
       "dialog": true,
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEZDQkM3Nzg0NDA1OUJCQ0QKUldUTnUxbEFoSGU4L0xIdXUvZ0RLU1phY3JMb0lPaTRsV01iYkVZckVqN3pDWG10NUFkanFVMG8K",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDI4RUY3MEI0Rjg4NEQxREQKUldUZDBZVDR0SER2S0VjdWdmM3NTNmMreEVEU3FUemY3OWVTUjBGR1h4RWE5bHhyTEhYRkpEaDgK",
       "windows": {
         "installMode": "passive"
       }

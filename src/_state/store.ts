@@ -1,29 +1,29 @@
 import { invoke } from "@tauri-apps/api/tauri";
-import { BehaviorSubject, ReplaySubject, Subject } from "rxjs";
-import { ActiveOcurrence, Ocurrence, Staff, Vehicle } from "../_consts/native";
-import { bindCreator$, bindDeleter$, bindUpdater$ } from "./store.impl";
+import { BehaviorSubject, ReplaySubject, Subject, distinctUntilChanged, map } from "rxjs";
+import { ActiveOccurrence, Occurrence, Staff, Vehicle } from "../_consts/native";
+import { bindCreator$, bindDeleter$, bindStateUpdatingCreator$, bindUpdater$ } from "./store.impl";
 
 export type State = {
-	active_ocurrences: Record<string, ActiveOcurrence>
-	ocurrences: Record<string, Ocurrence>
+	activeOccurrences: Record<string, ActiveOccurrence>
+	occurrences: Record<string, Occurrence>
 	vehicles: Record<string, Vehicle>
 	staff: Record<string, Staff>
 }
 
 export const store$ = new ReplaySubject<State>(1)
 
-invoke('get_state')
+invoke('get_store')
 	.then(state => { store$.next(state as State) })
 	.catch(err => { console.error('Failed to load state', err) })
 
 export const updatingState$ = new BehaviorSubject<boolean>(false)
 
-export const createActiveOcurrence$ = new Subject<ActiveOcurrence>()
-export const activeOcurrenceCreated$ = new Subject<string>()
-bindCreator$('active_ocurrences', createActiveOcurrence$, store$, updatingState$, activeOcurrenceCreated$, store$, 'create_active_ocurrence', 'occurrence')
-export const createOcurrence$ = new Subject<Ocurrence>()
-export const ocurrenceCreated$ = new Subject<string>()
-bindCreator$('ocurrences', createOcurrence$, store$, updatingState$, ocurrenceCreated$, store$, 'create_ocurrence', 'occurrence')
+export const createActiveOccurrence$ = new Subject<ActiveOccurrence>()
+export const activeOccurrenceCreated$ = new Subject<string>()
+bindStateUpdatingCreator$(createActiveOccurrence$, updatingState$, store$, 'create_active_occurrence', 'occurrence')
+export const createOccurrence$ = new Subject<Occurrence>()
+export const occurrenceCreated$ = new Subject<string>()
+bindCreator$('occurrences', createOccurrence$, store$, updatingState$, occurrenceCreated$, store$, 'create_occurrence', 'occurrence')
 export const createVehicle$ = new Subject<Vehicle>()
 export const vehicleCreated$ = new Subject<string>()
 bindCreator$('vehicles', createVehicle$, store$, updatingState$, vehicleCreated$, store$, 'create_vehicle', 'vehicle')
@@ -31,20 +31,25 @@ export const createStaff$ = new Subject<Staff>()
 export const staffCreated$ = new Subject<string>()
 bindCreator$('staff', createStaff$, store$, updatingState$, staffCreated$, store$, 'create_staff', 'staff')
 
-export const updateActiveOcurrence$ = new Subject<ActiveOcurrence>()
-bindUpdater$('active_ocurrences', updateActiveOcurrence$, store$, updatingState$, store$, 'update_active_ocurrence', 'occurrence')
-export const updateOcurrence$ = new Subject<Ocurrence>()
-bindUpdater$('ocurrences', updateOcurrence$, store$, updatingState$, store$, 'update_ocurrence', 'occurrence')
+export const updateActiveOccurrence$ = new Subject<ActiveOccurrence>()
+bindUpdater$('activeOccurrences', updateActiveOccurrence$, store$, updatingState$, store$, 'update_active_occurrence', 'occurrence')
+export const updateOccurrence$ = new Subject<Occurrence>()
+bindUpdater$('occurrences', updateOccurrence$, store$, updatingState$, store$, 'update_occurrence', 'occurrence')
 export const updateVehicle$ = new Subject<Vehicle>()
 bindUpdater$('vehicles', updateVehicle$, store$, updatingState$, store$, 'update_vehicle', 'vehicle')
 export const updateStaff$ = new Subject<Staff>()
 bindUpdater$('staff', updateStaff$, store$, updatingState$, store$, 'update_staff', 'staff')
 
-export const deleteActiveOcurrence$ = new Subject<string>()
-bindDeleter$('active_ocurrences', deleteActiveOcurrence$, store$, updatingState$, store$, 'delete_active_ocurrence', 'occurrence')
-export const deleteOcurrence$ = new Subject<string>()
-bindDeleter$('ocurrences', deleteOcurrence$, store$, updatingState$, store$, 'delete_ocurrence', 'occurrence')
+export const deleteActiveOccurrence$ = new Subject<string>()
+bindDeleter$('activeOccurrences', deleteActiveOccurrence$, store$, updatingState$, store$, 'delete_active_occurrence', 'activeOccurrenceId')
+export const deleteOccurrence$ = new Subject<string>()
+bindDeleter$('occurrences', deleteOccurrence$, store$, updatingState$, store$, 'delete_occurrence', 'occurrenceId')
 export const deleteVehicle$ = new Subject<string>()
-bindDeleter$('vehicles', deleteVehicle$, store$, updatingState$, store$, 'delete_vehicle', 'vehicle')
+bindDeleter$('vehicles', deleteVehicle$, store$, updatingState$, store$, 'delete_vehicle', 'vehicleId')
 export const deleteStaff$ = new Subject<string>()
-bindDeleter$('staff', deleteStaff$, store$, updatingState$, store$, 'delete_staff', 'staff')
+bindDeleter$('staff', deleteStaff$, store$, updatingState$, store$, 'delete_staff', 'staffId')
+
+export const activeOccurrences$ = store$.pipe(map(state => state.activeOccurrences), distinctUntilChanged())
+export const occurrences$ = store$.pipe(map(state => state.occurrences), distinctUntilChanged())
+export const vehicles$ = store$.pipe(map(state => state.vehicles), distinctUntilChanged())
+export const staff$ = store$.pipe(map(state => state.staff), distinctUntilChanged())

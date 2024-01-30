@@ -6,31 +6,59 @@ mod polly;
 mod torii;
 
 use anyhow::Result;
-use firefight::types::DataStore;
 use polly::client::create_polly_client;
 use polly::synthesize::synthesize_text;
 use rodio::{Decoder, OutputStream};
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Manager};
 use torii::audio;
-use std::{io::BufReader, fs::File, sync::Mutex, borrow::BorrowMut, ops::DerefMut};
+use std::{io::BufReader, fs::File, sync::Mutex};
+
+static SLOW_PROSODY_START: &str = "<prosody rate=\"slow\" volume=\"x-loud\"><amazon:effect name=\"drc\">";
+static X_SLOW_PROSODY_START: &str = "<prosody rate=\"x-slow\" volume=\"x-loud\"><amazon:effect name=\"drc\">";
+static PROSODY_END: &str = "</amazon:effect></prosody>";
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 async fn alarm(
     app_handle: AppHandle,
-    ocurrence: String,
+    occurrence: String,
     staff: Option<Vec<String>>,
     vehicles: Vec<String>,
 ) -> Result<(), String> {
-    println!("Alarm command received, vehicles: {:?}, ocurrence: {}", vehicles, ocurrence);
-    let ocurrence_value = String::from(ocurrence.trim());
+    println!("Alert command received, vehicles: {:?}, staff: {:?}, occurrence: {}", vehicles, staff, occurrence);
+    let mut sorted_staff = staff.unwrap_or(vec![])
+        .iter()
+        .map(|s| s.trim_start_matches("0").to_uppercase())
+        .collect::<Vec<String>>();
+    
+    sorted_staff.sort_by(|a, b| {
+        let a_value = a.parse::<i32>().unwrap_or_default();
+        let b_value = b.parse::<i32>().unwrap_or_default();
 
-    let mut sorted_vehicles = vehicles.iter().map(|v| v.trim().to_uppercase()).collect::<Vec<String>>();
+        if a_value == b_value {
+            return a.cmp(b);
+        }    
+        
+        return a_value.cmp(&b_value);
+    });
+
+    let mut sorted_vehicles = vehicles
+        .iter()
+        .map(|v| {
+            let mut v = v.clone();
+            v.retain(|c| !c.is_whitespace());
+            v
+        })
+        .collect::<Vec<String>>();
     sorted_vehicles.sort_unstable();
 
-    let mut ocurrence_key_comp = vec![String::from("-sit-"), ocurrence_value.clone()];
+    let mut staff_key_comp = if sorted_staff.len() > 0 { vec![String::from("-staff-"), sorted_staff.join("-")] } else { vec![] };
+    let mut occurrence_key_comp = vec![String::from("-sit-"), occurrence.clone()];
+        
     let mut audio_key_comp = sorted_vehicles.clone();
-    audio_key_comp.append(&mut ocurrence_key_comp);
+    audio_key_comp.append(&mut staff_key_comp);
+    audio_key_comp.append(&mut occurrence_key_comp);
+
     let audio_key = audio::get_string_hash(&audio_key_comp.join("-"));
 
     let mut cache_audio_result = audio::get_audio_from_cache(&app_handle, &audio_key);
@@ -40,8 +68,9 @@ async fn alarm(
 
         let polly_client = create_polly_client().await;
 
-        let vehicles_cue = sorted_vehicles.into_iter().map(|v| format!("<say-as interpret-as=\"spell-out\">{}</say-as>", v)).collect::<Vec<String>>().join(", ");
-        let audio_cue = format!("<speak>Saída de {} para {}.</speak>", vehicles_cue, ocurrence_value);
+        let vehicles_cue = sorted_vehicles.into_iter().map(|v| format!("{}<say-as interpret-as=\"spell-out\">{}</say-as>{}", X_SLOW_PROSODY_START, v, PROSODY_END)).collect::<Vec<String>>().join(", ");
+        let staff_cue = if sorted_staff.len() > 0 { format!("<s>{}Guarnição <break strength=\"weak\" /> {}{}{}{}</s>", SLOW_PROSODY_START, PROSODY_END, X_SLOW_PROSODY_START, sorted_staff.join("<break strength=\"medium\" />"), PROSODY_END) } else { String::from("") };        
+        let audio_cue = format!("<speak><s>{}Saída de {}{}{} para {}{}</s> {}</speak>", SLOW_PROSODY_START, PROSODY_END, vehicles_cue, SLOW_PROSODY_START, occurrence, PROSODY_END, staff_cue);
         
         let synthesize_result = synthesize_text(&polly_client, &audio_cue).await;
         if synthesize_result.is_err() {
@@ -72,14 +101,6 @@ async fn alarm(
     Ok(())
 }
 
-#[tauri::command]
-async fn get_store(state: State<'_, Mutex<firefight::local_store::LocalStore>>) -> Result<DataStore, String> {
-    let mut state_mutex = state.lock().unwrap();
-    let state_mutex_ref = state_mutex.borrow_mut();
-    let state = state_mutex_ref.deref_mut();
-
-    Ok(firefight::local_store::get_data_store(state))
-}
 
 #[cfg(dev)]
 #[tauri::command]
@@ -92,14 +113,26 @@ fn main() {
     tauri::Builder::default()
         .setup(|app| {
             let store = firefight::local_store::create_store(app.app_handle());
-            app.manage(store);
+            app.manage(Mutex::new(store));
 
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             alarm,
             get_environment,
-            get_store
+            firefight::commands::get_store,
+            firefight::commands::create_active_occurrence,
+            firefight::commands::create_occurrence,
+            firefight::commands::create_staff,
+            firefight::commands::create_vehicle,
+            firefight::commands::update_active_occurrence,
+            firefight::commands::update_occurrence,
+            firefight::commands::update_staff,
+            firefight::commands::update_vehicle,
+            firefight::commands::delete_active_occurrence,
+            firefight::commands::delete_occurrence,
+            firefight::commands::delete_staff,
+            firefight::commands::delete_vehicle
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

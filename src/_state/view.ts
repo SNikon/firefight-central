@@ -1,8 +1,7 @@
 import { Subject, distinctUntilChanged, merge, of } from "rxjs";
 
 export enum View {
-	Alert,
-	ManageOcurrences,
+	ManageStaff,
 	ManageVehicles,
 	Overview
 }

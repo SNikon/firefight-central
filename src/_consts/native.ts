@@ -1,13 +1,13 @@
 
-export type ActiveOcurrence = {
-	id: string
-	ocurrenceId: string
+export type ActiveOccurrence = {
+	internalId: string
+	occurrenceId: string
 	vehicleIds: string[]
 	staffIds: string[]
 }
 
-export type Ocurrence = {
-	id: string
+export type Occurrence = {
+	internalId: string
 	image: string
 	name: string
 }
@@ -19,8 +19,9 @@ export enum VehicleState {
 }
 
 export type Vehicle = {
-	id: string
+	internalId: string
 	image: string
+	label: string
 	state: VehicleState
 }
 
@@ -31,8 +32,9 @@ export enum StaffState {
 }
 
 export type Staff = {
-	id: string
+	internalId: string
 	image: string
+	label: string
 	name: string
 	state: StaffState
 }
