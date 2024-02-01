@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Configuration file, should not be included in the project.
+# Eventually move this to github secrets
+src-tauri/src/polly/config.rs
