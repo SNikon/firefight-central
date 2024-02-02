@@ -2,8 +2,9 @@ use std::borrow::BorrowMut;
 use std::ops::DerefMut;
 use std::sync::Mutex;
 
-use tauri::State;
+use tauri::{AppHandle, Manager, State};
 
+use super::events::STATE_UPDATED;
 use super::types::{Vehicle, FirefightDataManager, DataStore, Occurrence, ActiveOccurrence, Staff};
 use super::local_store::{get_data_store, LocalStore};
 
@@ -20,9 +21,10 @@ pub fn get_store(
 
 #[tauri::command(async)]
 pub fn create_active_occurrence(
+    app_handle: AppHandle,
 	state: State<'_, Mutex<LocalStore>>,
 	occurrence: ActiveOccurrence
-) -> Result<DataStore, String> {
+) -> Result<(), String> {
 	let mut state_mutex = state.lock().unwrap();
 	let state_mutex_ref = state_mutex.borrow_mut();
 	let state = state_mutex_ref.deref_mut();
@@ -30,14 +32,16 @@ pub fn create_active_occurrence(
 	let create_result = state.create_active_occurrence(occurrence);
 	if let Err(create_error) = create_result { return Err(create_error.to_string()); }
 
-	Ok(get_data_store(state))
+	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
+	Ok(())
 }
 
 #[tauri::command(async)]
 pub fn create_occurrence(
+    app_handle: AppHandle,
 	state: State<'_, Mutex<LocalStore>>,
 	occurrence: Occurrence
-) -> Result<String, String> {
+) -> Result<(), String> {
 	let mut state_mutex = state.lock().unwrap();
 	let state_mutex_ref = state_mutex.borrow_mut();
 	let state = state_mutex_ref.deref_mut();
@@ -45,14 +49,16 @@ pub fn create_occurrence(
 	let create_result = state.create_occurrence(occurrence);
 	if let Err(create_error) = create_result { return Err(create_error.to_string()); }
 
-	Ok(create_result.unwrap())
+	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
+	Ok(())
 }
 
 #[tauri::command(async)]
 pub fn create_staff(
+    app_handle: AppHandle,
 	state: State<'_, Mutex<LocalStore>>,
 	staff: Staff
-) -> Result<String, String> {
+) -> Result<(), String> {
 	let mut state_mutex = state.lock().unwrap();
 	let state_mutex_ref = state_mutex.borrow_mut();
 	let state = state_mutex_ref.deref_mut();
@@ -60,14 +66,16 @@ pub fn create_staff(
 	let create_result = state.create_staff(staff);
 	if let Err(create_error) = create_result { return Err(create_error.to_string()); }
 
-	Ok(create_result.unwrap())
+	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
+	Ok(())
 }
 
 #[tauri::command(async)]
 pub fn create_vehicle(
-    state: State<'_, Mutex<LocalStore>>,
+    app_handle: AppHandle,
+	state: State<'_, Mutex<LocalStore>>,
     vehicle: Vehicle
-) -> Result<String, String> {
+) -> Result<(), String> {
     let mut state_mutex = state.lock().unwrap();
     let state_mutex_ref = state_mutex.borrow_mut();
     let state = state_mutex_ref.deref_mut();
@@ -75,11 +83,13 @@ pub fn create_vehicle(
     let create_result = state.create_vehicle(vehicle);
     if let Err(create_error) = create_result { return Err(create_error.to_string()); }
 
-    Ok(create_result.unwrap())
+	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
+	Ok(())
 }
 
 #[tauri::command(async)]
 pub fn update_active_occurrence(
+    app_handle: AppHandle,
 	state: State<'_, Mutex<LocalStore>>,
 	active_occurrence: ActiveOccurrence
 ) -> Result<(), String> {
@@ -90,11 +100,13 @@ pub fn update_active_occurrence(
 	let update_result = state.update_active_occurrence(active_occurrence.internal_id.clone(), active_occurrence);
 	if let Err(update_error) = update_result { return Err(update_error.to_string()); }
 
+	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
 	Ok(())
 }
 
 #[tauri::command(async)]
 pub fn update_occurrence(
+    app_handle: AppHandle,
 	state: State<'_, Mutex<LocalStore>>,
 	occurrence: Occurrence
 ) -> Result<(), String> {
@@ -105,11 +117,13 @@ pub fn update_occurrence(
 	let update_result = state.update_occurrence(occurrence.internal_id.clone(), occurrence);
 	if let Err(update_error) = update_result { return Err(update_error.to_string()); }
 
+	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
 	Ok(())
 }
 
 #[tauri::command(async)]
 pub fn update_staff(
+    app_handle: AppHandle,
 	state: State<'_, Mutex<LocalStore>>,
 	staff: Staff
 ) -> Result<(), String> {
@@ -120,11 +134,13 @@ pub fn update_staff(
 	let update_result = state.update_staff(staff.internal_id.clone(), staff);
 	if let Err(update_error) = update_result { return Err(update_error.to_string()); }
 
+	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
 	Ok(())
 }
 
 #[tauri::command(async)]
 pub fn update_vehicle(
+    app_handle: AppHandle,
 	state: State<'_, Mutex<LocalStore>>,
 	vehicle: Vehicle
 ) -> Result<(), String> {
@@ -135,11 +151,13 @@ pub fn update_vehicle(
 	let update_result = state.update_vehicle(vehicle.internal_id.clone(), vehicle);
 	if let Err(update_error) = update_result { return Err(update_error.to_string()); }
 
+	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
 	Ok(())
 }
 
 #[tauri::command(async)]
 pub fn delete_active_occurrence(
+    app_handle: AppHandle,
 	state: State<'_, Mutex<LocalStore>>,
 	active_occurrence_id: String
 ) -> Result<(), String> {
@@ -150,11 +168,13 @@ pub fn delete_active_occurrence(
 	let delete_result = state.delete_active_occurrence(active_occurrence_id);
 	if let Err(delete_error) = delete_result { return Err(delete_error.to_string()); }
 
+	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
 	Ok(())
 }
 
 #[tauri::command(async)]
 pub fn delete_occurrence(
+    app_handle: AppHandle,
 	state: State<'_, Mutex<LocalStore>>,
 	occurrence_id: String
 ) -> Result<(), String> {
@@ -165,11 +185,13 @@ pub fn delete_occurrence(
 	let delete_result = state.delete_occurrence(occurrence_id);
 	if let Err(delete_error) = delete_result { return Err(delete_error.to_string()); }
 
+	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
 	Ok(())
 }
 
 #[tauri::command(async)]
 pub fn delete_staff(
+    app_handle: AppHandle,
 	state: State<'_, Mutex<LocalStore>>,
 	staff_id: String
 ) -> Result<(), String> {
@@ -180,11 +202,13 @@ pub fn delete_staff(
 	let delete_result = state.delete_staff(staff_id);
 	if let Err(delete_error) = delete_result { return Err(delete_error.to_string()); }
 
+	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
 	Ok(())
 }
 
 #[tauri::command(async)]
 pub fn delete_vehicle(
+    app_handle: AppHandle,
 	state: State<'_, Mutex<LocalStore>>,
 	vehicle_id: String
 ) -> Result<(), String> {
@@ -195,5 +219,6 @@ pub fn delete_vehicle(
 	let delete_result = state.delete_vehicle(vehicle_id);
 	if let Err(delete_error) = delete_result { return Err(delete_error.to_string()); }
 
+	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
 	Ok(())
 }

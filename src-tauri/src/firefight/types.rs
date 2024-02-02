@@ -52,7 +52,7 @@ pub struct ActiveOccurrence {
 	pub vehicle_ids: Vec<String>,
 }
 
-#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DataStore {
 	pub active_occurrences: HashMap<String, ActiveOccurrence>,
