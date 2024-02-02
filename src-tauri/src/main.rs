@@ -132,7 +132,8 @@ fn main() {
             firefight::commands::delete_active_occurrence,
             firefight::commands::delete_occurrence,
             firefight::commands::delete_staff,
-            firefight::commands::delete_vehicle
+            firefight::commands::delete_vehicle,
+            torii::commands::open_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

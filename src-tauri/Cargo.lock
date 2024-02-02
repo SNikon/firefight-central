@@ -1220,7 +1220,6 @@ dependencies = [
  "anyhow",
  "aws-config",
  "aws-sdk-polly",
- "firefight_macro",
  "proc-macro2",
  "rodio",
  "serde",
@@ -1231,14 +1230,6 @@ dependencies = [
  "uuid",
  "window-shadows",
  "windows 0.52.0",
-]
-
-[[package]]
-name = "firefight_macro"
-version = "0.1.0"
-dependencies = [
- "quote",
- "syn 1.0.109",
 ]
 
 [[package]]
