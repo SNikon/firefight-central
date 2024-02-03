@@ -1,22 +1,23 @@
-import { FunctionComponent } from "react"
-import { StaffState } from "../../_consts/native"
-import { staffStateToLocale } from "../../_utils/staffStateToLocale"
+import { type FunctionComponent } from 'react'
+import { type StaffState } from '../../_consts/native'
+import { staffStateToLocale } from '../../_utils/staffStateToLocale'
 import staffSample from '../../_assets/staff_sample.jpg'
 import check from '../../_assets/check-solid.svg'
-import { getCardClassForStates } from "../../_utils/cardStyle"
-import classNames from "classnames"
-import { shortenName } from "../../_utils/shortenName"
+import { getCardClassForStates } from '../../_utils/cardStyle'
+import classNames from 'classnames'
+import { shortenName } from '../../_utils/shortenName'
+import { defaultToNbSp } from '../../_utils/defaultToNbsp'
 
-interface StaffCardProps {
-	disabled?: boolean
-	image?: string
-	internalId: string
-	label: string
-	name: string
-	onClick?: (internalId: string) => void
-	selected?: boolean
-	small?: boolean
-	state: StaffState
+type StaffCardProps = {
+	disabled?: boolean;
+	image?: string;
+	internalId: string;
+	label: string;
+	name: string;
+	onClick?: (internalId: string) => void;
+	selected?: boolean;
+	small?: boolean;
+	state: StaffState;
 }
 
 export const StaffCard: FunctionComponent<StaffCardProps> = props => {
@@ -33,33 +34,33 @@ export const StaffCard: FunctionComponent<StaffCardProps> = props => {
 	return (
 		<div className={containerClassName}>
 			<button disabled={props.disabled} className={buttonClassName} onClick={clickHandler}>
-				<div className="rounded relative flex flex-1 flex-col w-full h-full overflow-hidden justify-center items-center">
+				<div className='rounded relative flex flex-1 flex-col w-full h-full overflow-hidden justify-center items-center'>
 					{!props.small && (
-						<div className="flex flex-col align-middle justify-center overflow-hidden rounded">					
-							<img className="max-h-fit object-contain" src={imgSource} />
+						<div className='flex flex-col align-middle justify-center overflow-hidden rounded'>
+							<img className='max-h-fit object-contain' src={imgSource} />
 						</div>
 					)}
 
-					<div className="absolute flex flex-col justify-between w-full h-full pointer-events-none">
-						<div className="w-full p-2 flex flex-col items-center justify-center bg-gradient-to-b from-[#000]/90 to-[#000]/30">
-							<label className="text-ellipsis whitespace-nowrap truncate">{props.label || <>&nbsp;</>}</label>
-							
+					<div className='absolute flex flex-col justify-between w-full h-full pointer-events-none'>
+						<div className='w-full p-2 flex flex-col items-center justify-center bg-gradient-to-b from-[#000]/90 to-[#000]/30'>
+							<label className='text-ellipsis whitespace-nowrap truncate'>{defaultToNbSp(props.label)}</label>
+
 							{!props.small && (
-								<label className="text-ellipsis whitespace-nowrap truncate">{props.name || <>&nbsp;</>}</label>
+								<label className='text-ellipsis whitespace-nowrap truncate'>{defaultToNbSp(props.name)}</label>
 							)}
 						</div>
 
-						<div className="w-full p-2 flex items-center justify-center bg-gradient-to-t from-[#000]/90 to-[#000]/30 text-ellipsis whitespace-nowrap truncate">
-							{props.small
-								? shortenName(props.name) || <>&nbsp;</>
-								: staffStateToLocale(props.state) || <>&nbsp;</>}				
+						<div className='w-full p-2 flex items-center justify-center bg-gradient-to-t from-[#000]/90 to-[#000]/30 text-ellipsis whitespace-nowrap truncate'>
+							{defaultToNbSp(props.small
+								? shortenName(props.name)
+								: staffStateToLocale(props.state))}
 						</div>
 					</div>
 				</div>
 
 				{props.selected && (
-					<div className="absolute right-0 top-0 rounded-bl-full bg-primary w-10 h-10 flex justify-center items-center">
-						<img className="ml-2 mb-1 w-5 h-5" src={check} />
+					<div className='absolute right-0 top-0 rounded-bl-full bg-primary w-10 h-10 flex justify-center items-center'>
+						<img className='ml-2 mb-1 w-5 h-5' src={check} />
 					</div>
 				)}
 			</button>

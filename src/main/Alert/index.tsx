@@ -1,3 +1,1 @@
-export const Alert = () => {
-	return 'Alert'
-}
+export const Alert = () => 'Alert'

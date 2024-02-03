@@ -1,4 +1,4 @@
-import { StaffState } from "../_consts/native"
+import { StaffState } from '../_consts/native'
 
 export const staffStateToLocale = (state: StaffState): string => {
 	switch (state) {
@@ -8,5 +8,7 @@ export const staffStateToLocale = (state: StaffState): string => {
 			return 'Indisponível'
 		case StaffState.Dispatched:
 			return 'Em Serviço'
+		default:
+			return ''
 	}
 }

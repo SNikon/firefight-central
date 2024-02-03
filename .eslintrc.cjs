@@ -1,56 +1,46 @@
+const stylistic = require("@stylistic/eslint-plugin");
+
 module.exports = {
 	env: {
 		browser: true,
-		es2021: true,
+		es2021: true
 	},
 	extends: [
-		'xo',
+		'eslint:recommended',
+		'plugin:@typescript-eslint/recommended',
 		'plugin:react/recommended',
+		'plugin:react/jsx-runtime'
 	],
+	parser: '@typescript-eslint/parser',
+	parserOptions: {
+		ecmaFeatures: { jsx: true },
+		ecmaVersion: "latest",
+		sourceType: "module",
+		warnOnUnsupportedTypeScriptVersion: false
+	},
 	overrides: [
 		{
-			env: {
-				node: true,
-			},
-			files: [
-				'.eslintrc.{js,cjs}',
-			],
-			parserOptions: {
-				sourceType: 'script',
-			},
+			env: { node: true,},
+			files: ['.eslintrc.cjs', 'postcss.config.js', 'tailwind.config.js'],
+			parserOptions: { sourceType: 'script' }
 		},
 		{
-			extends: [
-				'xo-typescript',
-			],
-			files: [
-				'*.ts',
-				'*.tsx',
-			],
-			rules: {
-				'comma-dangle': 'off',
-				indent: ['warn', 'tab'],
-				'object-curly-spacing': 'off',
-				semi: 'off',
-				'react/react-in-jsx-scope': 'off',
-				'@typescript-eslint/comma-dangle': ['warn', 'never'],
-				'@typescript-eslint/object-curly-spacing': ['warn', 'always'],
-				'@typescript-eslint/semi': ['warn', 'never']
-			}
-		},
+			files: '*.ts?(x)',
+			rules: { 'no-undef': 'off' }
+		}
 	],
-	parserOptions: {
-		ecmaVersion: 'latest',
-		sourceType: 'module',
-	},
 	plugins: [
-		'react',
+		'@stylistic',
+		'@typescript-eslint',
+		'react'
 	],
+	reportUnusedDisableDirectives: true,
 	rules: {
+		'no-unused-vars': 'off',
 	},
 	settings: {
 		react: {
 			version: 'detect'
 		}
 	}
-};
+}

@@ -1,14 +1,14 @@
-import { Button } from "../../_components/Button"
-import { CardGrid } from "../../_components/CardGrid"
-import { VehicleCard } from "../../_components/VehicleCard"
-import { TableHeader } from "../_components/TableHeader"
-import { useObservable } from "react-use"
-import { vehicles$ } from "../../_state/store"
-import { useMemo, useState } from "react"
-import { Modal } from "../../_components/Modal"
-import { Scrollable } from "../../_components/Scrollable"
-import { vehicleSortByLabel } from "../../_utils/vehicleSort"
-import { VehiclePanel } from "../_components/VehiclePanel"
+import { Button } from '../../_components/Button'
+import { CardGrid } from '../../_components/CardGrid'
+import { VehicleCard } from '../../_components/VehicleCard'
+import { TableHeader } from '../_components/TableHeader'
+import { useObservable } from 'react-use'
+import { vehicles$ } from '../../_state/store'
+import { useMemo, useState } from 'react'
+import { Modal } from '../../_components/Modal'
+import { Scrollable } from '../../_components/Scrollable'
+import { vehicleSortByLabel } from '../../_utils/vehicleSort'
+import { VehiclePanel } from '../_components/VehiclePanel'
 
 export const ManageVehicles = () => {
 	const vehicleMap = useObservable(vehicles$, {})
@@ -18,10 +18,10 @@ export const ManageVehicles = () => {
 		return entries
 	}, [vehicleMap])
 
-	const [selectedId, setSelectedId] = useState<string | null>(null)
+	const [selectedId, setSelectedId] = useState<string | undefined>(null)
 	const [showForm, setShowForm] = useState(false)
 	const closeForm = setShowForm.bind(null, false)
-	
+
 	const onCreate = () => {
 		setSelectedId(null)
 		setShowForm(true)
@@ -33,12 +33,12 @@ export const ManageVehicles = () => {
 	}
 
 	return (
-		<div className="bg-body-background text-body-text flex flex-1 flex-col overflow-hidden select-none">
+		<div className='bg-body-background text-body-text flex flex-1 flex-col overflow-hidden select-none'>
 			<TableHeader>
 				<Button onClick={onCreate}>Novo veículo</Button>
 			</TableHeader>
 
-			<Scrollable className="pb-10">
+			<Scrollable className='pb-10'>
 				<CardGrid>
 					{vehicles.map(vehicle => (
 						<VehicleCard
