@@ -1,8 +1,8 @@
 import { invoke } from '@tauri-apps/api/tauri'
 import { BehaviorSubject, ReplaySubject, Subject, distinctUntilChanged, map } from 'rxjs'
+import { listen } from '@tauri-apps/api/event'
 import { type ActiveOccurrence, type Occurrence, type Staff, type Vehicle } from '../_consts/native'
 import { bindCreator$, bindDeleter$, bindUpdater$ } from './store.impl'
-import { listen } from '@tauri-apps/api/event'
 
 export type State = {
 	activeOccurrences: Record<string, ActiveOccurrence>;

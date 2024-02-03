@@ -1,6 +1,6 @@
 import { type FunctionComponent } from 'react'
-import { getCardClassForStates } from '../../_utils/cardStyle'
 import classNames from 'classnames'
+import { getCardClassForStates } from '../../_utils/cardStyle'
 
 type OccurrenceCardProps = {
 	internalId: string;

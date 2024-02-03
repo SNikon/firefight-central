@@ -1,6 +1,6 @@
 import { type FunctionComponent } from 'react'
-import { occurrences$ } from '../../_state/store'
 import { useObservable } from 'react-use'
+import { occurrences$ } from '../../_state/store'
 import { Button } from '../Button'
 
 const entryClasses = 'w-full px-2 flex items-center justify-start text-left whitespace-nowrap'

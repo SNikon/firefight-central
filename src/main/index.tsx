@@ -1,13 +1,13 @@
-import { ApplicationHeader } from './_components/ApplicationHeader'
 import { useObservable } from 'react-use'
-import { View, activeView$ } from '../_state/view'
-import { ManageVehicles } from './ManageVehicles'
-import { Overview } from './Overview'
-import { useDisableContextMenu } from '../_utils/useDisableContextMenu'
-import { ManageStaff } from './ManageStaff'
 import { updater } from '@tauri-apps/api'
 import { useEffect } from 'react'
 import { relaunch } from '@tauri-apps/api/process'
+import { View, activeView$ } from '../_state/view'
+import { useDisableContextMenu } from '../_utils/useDisableContextMenu'
+import { ApplicationHeader } from './_components/ApplicationHeader'
+import { ManageVehicles } from './ManageVehicles'
+import { Overview } from './Overview'
+import { ManageStaff } from './ManageStaff'
 
 const useUpdateOnLaunch = () => {
 	useEffect(() => {

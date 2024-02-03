@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { useResizeWindow } from '../_utils/useResizeWindow'
-import { Button } from '../_components/Button'
 import { updater } from '@tauri-apps/api'
 import { relaunch } from '@tauri-apps/api/process'
+import { useResizeWindow } from '../_utils/useResizeWindow'
+import { Button } from '../_components/Button'
 
 const onCheck = () => {
 	updater.checkUpdate()

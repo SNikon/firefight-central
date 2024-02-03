@@ -1,7 +1,7 @@
 import { type FunctionComponent, useMemo } from 'react'
+import { useObservable } from 'react-use'
 import { activeOccurrences$, deleteActiveOccurrence$, occurrences$, staff$, vehicles$ } from '../../../_state/store'
 import { Button } from '../../../_components/Button'
-import { useObservable } from 'react-use'
 import { Scrollable } from '../../../_components/Scrollable'
 import { staffSortByLabel } from '../../../_utils/staffSort'
 import { vehicleSortByLabel } from '../../../_utils/vehicleSort'
