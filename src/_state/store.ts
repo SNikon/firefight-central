@@ -1,21 +1,25 @@
-import { invoke } from "@tauri-apps/api/tauri";
-import { BehaviorSubject, ReplaySubject, Subject, distinctUntilChanged, map } from "rxjs";
-import { ActiveOccurrence, Occurrence, Staff, Vehicle } from "../_consts/native";
-import { bindCreator$, bindDeleter$, bindUpdater$ } from "./store.impl";
-import { listen } from "@tauri-apps/api/event";
+import { invoke } from '@tauri-apps/api/tauri'
+import { BehaviorSubject, ReplaySubject, Subject, distinctUntilChanged, map } from 'rxjs'
+import { type ActiveOccurrence, type Occurrence, type Staff, type Vehicle } from '../_consts/native'
+import { bindCreator$, bindDeleter$, bindUpdater$ } from './store.impl'
+import { listen } from '@tauri-apps/api/event'
 
 export type State = {
-	activeOccurrences: Record<string, ActiveOccurrence>
-	occurrences: Record<string, Occurrence>
-	vehicles: Record<string, Vehicle>
-	staff: Record<string, Staff>
+	activeOccurrences: Record<string, ActiveOccurrence>;
+	occurrences: Record<string, Occurrence>;
+	vehicles: Record<string, Vehicle>;
+	staff: Record<string, Staff>;
 }
 
 export const store$ = new ReplaySubject<State>(1)
 
 invoke('get_store')
-	.then(state => { store$.next(state as State) })
-	.catch(err => { console.error('Failed to load state', err) })
+	.then(state => {
+		store$.next(state as State)
+	})
+	.catch(err => {
+		console.error('Failed to load state', err)
+	})
 
 listen('firefight://state_updated', ({ payload }) => {
 	console.trace('Updating state', { payload })

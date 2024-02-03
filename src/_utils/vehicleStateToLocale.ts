@@ -1,4 +1,4 @@
-import { VehicleState } from "../_consts/native"
+import { VehicleState } from '../_consts/native'
 
 export const vehicleStateToLocale = (state: VehicleState): string => {
 	switch (state) {
@@ -8,5 +8,7 @@ export const vehicleStateToLocale = (state: VehicleState): string => {
 			return 'Inoperacional'
 		case VehicleState.Dispatched:
 			return 'Em Serviço'
+		default:
+			return ''
 	}
 }

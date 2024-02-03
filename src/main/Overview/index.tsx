@@ -1,21 +1,21 @@
-import { Button } from "../../_components/Button"
-import { CardGrid } from "../../_components/CardGrid"
-import { VehicleCard } from "../../_components/VehicleCard"
-import { TableHeader } from "../_components/TableHeader"
-import { Scrollable } from "../../_components/Scrollable"
-import { ActiveOccurrenceCard } from "../../_components/ActiveOccurrenceCard"
-import { useObservable } from "react-use"
-import { activeOccurrences$, staff$, vehicles$ } from "../../_state/store"
-import { useMemo, useState } from "react"
-import { StaffCard } from "../../_components/StaffCard"
-import { Modal } from "../../_components/Modal"
-import { CreateActiveOccurrence } from "./CreateActiveOccurrence"
-import { vehicleSortByOverviewState } from "../../_utils/vehicleSort"
-import { staffSortByOverviewState } from "../../_utils/staffSort"
-import { OccurrencePanel } from "../_components/OccurrencePanel"
-import { StaffState, VehicleState } from "../../_consts/native"
-import { StaffPanel } from "../_components/StaffPanel"
-import { VehiclePanel } from "../_components/VehiclePanel"
+import { Button } from '../../_components/Button'
+import { CardGrid } from '../../_components/CardGrid'
+import { VehicleCard } from '../../_components/VehicleCard'
+import { TableHeader } from '../_components/TableHeader'
+import { Scrollable } from '../../_components/Scrollable'
+import { ActiveOccurrenceCard } from '../../_components/ActiveOccurrenceCard'
+import { useObservable } from 'react-use'
+import { activeOccurrences$, staff$, vehicles$ } from '../../_state/store'
+import { useMemo, useState } from 'react'
+import { StaffCard } from '../../_components/StaffCard'
+import { Modal } from '../../_components/Modal'
+import { CreateActiveOccurrence } from './CreateActiveOccurrence'
+import { vehicleSortByOverviewState } from '../../_utils/vehicleSort'
+import { staffSortByOverviewState } from '../../_utils/staffSort'
+import { OccurrencePanel } from '../_components/OccurrencePanel'
+import { StaffState, VehicleState } from '../../_consts/native'
+import { StaffPanel } from '../_components/StaffPanel'
+import { VehiclePanel } from '../_components/VehiclePanel'
 
 export const Overview = () => {
 	const activeOccurrenceMap = useObservable(activeOccurrences$, {})
@@ -57,12 +57,12 @@ export const Overview = () => {
 	}
 
 	const onStaffClick = (id: string) => {
-		const staff = staffMap[id]!
-		
+		const staff = staffMap[id]
+
 		const isDispatched = staff.state === StaffState.Dispatched
 		if (isDispatched) {
 			const occurrenceId = sortedOccurrences.find(occurrence => occurrence.staffIds.includes(id))?.internalId
-			
+
 			if (occurrenceId) {
 				setSelectedId(occurrenceId)
 				setShowViewOccurrence(true)
@@ -71,16 +71,16 @@ export const Overview = () => {
 		}
 
 		setSelectedId(id)
-		setShowViewStaff(true)	
+		setShowViewStaff(true)
 	}
 
 	const onVehicleClick = (id: string) => {
-		const vehicle = vehicleMap[id]!
-		
+		const vehicle = vehicleMap[id]
+
 		const isDispatched = vehicle.state === VehicleState.Dispatched
 		if (isDispatched) {
 			const occurrenceId = sortedOccurrences.find(occurrence => occurrence.vehicleIds.includes(id))?.internalId
-			
+
 			if (occurrenceId) {
 				setSelectedId(occurrenceId)
 				setShowViewOccurrence(true)
@@ -89,17 +89,17 @@ export const Overview = () => {
 		}
 
 		setSelectedId(id)
-		setShowViewVehicle(true)	
+		setShowViewVehicle(true)
 	}
-	
+
 	return (
-		<div className="bg-body-background text-body-text flex flex-col overflow-hidden">	
+		<div className='bg-body-background text-body-text flex flex-col overflow-hidden'>
 			<TableHeader>
 				<Button onClick={setShowCreateOccurrence.bind(null, true)}>Nova Ocorrência</Button>
 			</TableHeader>
 
-			<Scrollable className="pb-10">
-				<div className="px-5 grid grid-flow-col gap-5 justify-start">
+			<Scrollable className='pb-10'>
+				<div className='w-full px-5 pt-5 h-max gap-5 grid sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3'>
 					{sortedOccurrences.map(occurrence => (
 						<ActiveOccurrenceCard
 							key={occurrence.internalId}
@@ -111,8 +111,8 @@ export const Overview = () => {
 						/>
 					))}
 				</div>
-				
-				<h2 className="px-5 my-5 text-actionHighlight font-extrabold text-2xl">
+
+				<h2 className='px-5 my-5 text-actionHighlight font-extrabold text-2xl'>
 					Veículos
 				</h2>
 
@@ -128,8 +128,8 @@ export const Overview = () => {
 						/>
 					))}
 				</CardGrid>
-			
-				<h2 className="px-5 my-5 text-actionHighlight font-extrabold text-2xl">
+
+				<h2 className='px-5 my-5 text-actionHighlight font-extrabold text-2xl'>
 					Pessoal
 				</h2>
 
@@ -147,7 +147,7 @@ export const Overview = () => {
 					))}
 				</CardGrid>
 			</Scrollable>
-					
+
 			{showCreateOccurrence && <Modal><CreateActiveOccurrence onClose={setShowCreateOccurrence.bind(null, false)} /></Modal>}
 			{showViewOccurrence && <Modal><OccurrencePanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewOccurrence)} /></Modal>}
 			{showViewStaff && <Modal><StaffPanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewStaff)} /></Modal>}

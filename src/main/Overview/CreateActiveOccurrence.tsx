@@ -1,24 +1,24 @@
-import { FunctionComponent, useCallback, useMemo, useState } from "react"
-import { CardGrid } from "../../_components/CardGrid"
-import { Scrollable } from "../../_components/Scrollable"
-import { TableHeader } from "../_components/TableHeader"
-import { Button } from "../../_components/Button"
-import { createActiveOccurrence$, occurrences$, staff$, vehicles$ } from "../../_state/store"
-import { useObservable } from "react-use"
-import { OccurrenceCard } from "../../_components/OccurrenceCard"
-import { VehicleCard } from "../../_components/VehicleCard"
-import { vehicleSortByOcurrenceState } from "../../_utils/vehicleSort"
-import { occurrenceSortByLabel } from "../../_utils/occurrenceSort"
-import { staffSortByOccurrenceState } from "../../_utils/staffSort"
-import { StaffCard } from "../../_components/StaffCard"
-import { invoke } from "@tauri-apps/api"
-import { FullscreenOverlay } from "../../_components/FullScreenOverlay"
+import { type FunctionComponent, useCallback, useMemo, useState } from 'react'
+import { CardGrid } from '../../_components/CardGrid'
+import { Scrollable } from '../../_components/Scrollable'
+import { TableHeader } from '../_components/TableHeader'
+import { Button } from '../../_components/Button'
+import { createActiveOccurrence$, occurrences$, staff$, vehicles$ } from '../../_state/store'
+import { useObservable } from 'react-use'
+import { OccurrenceCard } from '../../_components/OccurrenceCard'
+import { VehicleCard } from '../../_components/VehicleCard'
+import { vehicleSortByOcurrenceState } from '../../_utils/vehicleSort'
+import { occurrenceSortByLabel } from '../../_utils/occurrenceSort'
+import { staffSortByOccurrenceState } from '../../_utils/staffSort'
+import { StaffCard } from '../../_components/StaffCard'
+import { invoke } from '@tauri-apps/api'
+import { FullscreenOverlay } from '../../_components/FullScreenOverlay'
 
-interface SectionProps<T> {
-	initialValue: T
-	onCancel: () => void
-	onNext: (value: T) => void
-	onPrevious: () => void
+type SectionProps<T> = {
+	initialValue: T;
+	onCancel: () => void;
+	onNext: (value: T) => void;
+	onPrevious: () => void;
 }
 
 type PickOccurrenceProps = SectionProps<string>
@@ -31,7 +31,7 @@ const PickOccurrence: FunctionComponent<PickOccurrenceProps> = ({ initialValue, 
 	}, [occurrences])
 
 	return (
-		<div className="text-action flex flex-col overflow-hidden">
+		<div className='text-action flex flex-col overflow-hidden'>
 			<TableHeader>
 				<Button onClick={onCancel}>Cancelar</Button>
 			</TableHeader>
@@ -62,8 +62,9 @@ const PickVehicles: FunctionComponent<PickVehiclesProps> = ({ initialValue, onCa
 	}, [vehicles])
 
 	const [selected, setSelected] = useState<string[]>(initialValue)
-	
-	const onSelect = (vehicleId: string) => setSelected(prevSelected => {
+
+	const onSelect = (vehicleId: string) => {
+ setSelected(prevSelected => {
 		const foundIdx = prevSelected.indexOf(vehicleId)
 		if (foundIdx >= 0) {
 			const nextSelected = prevSelected.slice()
@@ -72,11 +73,11 @@ const PickVehicles: FunctionComponent<PickVehiclesProps> = ({ initialValue, onCa
 		}
 
 		return [...prevSelected, vehicleId]
-	})
+	}) }
 	const onConfirm = onNext.bind(null, selected)
 
 	return (
-		<div className="text-action flex flex-col overflow-hidden">
+		<div className='text-action flex flex-col overflow-hidden'>
 			<TableHeader>
 				<Button onClick={onCancel}>Cancelar</Button>
 				<Button onClick={onPrevious}>Voltar</Button>
@@ -111,25 +112,26 @@ const PickStaff: FunctionComponent<PickStaffProps> = ({ initialValue, onCancel, 
 	}, [staff])
 
 	const [selected, setSelected] = useState<string[]>(initialValue)
-	
-	const onSelect = (vehicleId: string) => setSelected(prevSelected => {
-		const foundIdx = prevSelected.indexOf(vehicleId)
-		if (foundIdx >= 0) {
-			const nextSelected = prevSelected.slice()
-			nextSelected.splice(foundIdx, 1)
-			return nextSelected
-		}
 
-		return [...prevSelected, vehicleId]
-	})
-	const onConfirm = onNext.bind(null, selected)
+	const onSelect = (vehicleId: string) => {
+		setSelected(prevSelected => {
+			const foundIdx = prevSelected.indexOf(vehicleId)
+			if (foundIdx >= 0) {
+				const nextSelected = prevSelected.slice()
+				nextSelected.splice(foundIdx, 1)
+				return nextSelected
+			}
+
+			return [...prevSelected, vehicleId]
+		})
+	}
 
 	return (
-		<div className="text-action flex flex-col overflow-hidden">
+		<div className='text-action flex flex-col overflow-hidden'>
 			<TableHeader>
 				<Button onClick={onCancel}>Cancelar</Button>
 				<Button onClick={onPrevious}>Voltar</Button>
-				<Button onClick={onConfirm}>Continuar</Button>
+				<Button onClick={onNext.bind(null, selected)}>Continuar</Button>
 			</TableHeader>
 			<Scrollable>
 				<CardGrid>
@@ -151,11 +153,11 @@ const PickStaff: FunctionComponent<PickStaffProps> = ({ initialValue, onCancel, 
 	)
 }
 
-interface ConfirmOccurrenceProps extends Omit<SectionProps<void>, 'initialValue'> {
-	occurrenceId: string
-	vehicleIds: string[]
-	staffIds: string[]
-}
+type ConfirmOccurrenceProps = {
+	occurrenceId: string;
+	vehicleIds: string[];
+	staffIds: string[];
+} & Omit<SectionProps<void>, 'initialValue'>
 
 const ConfirmOccurrence: FunctionComponent<ConfirmOccurrenceProps> = ({
 	occurrenceId,
@@ -172,23 +174,23 @@ const ConfirmOccurrence: FunctionComponent<ConfirmOccurrenceProps> = ({
 	const occurrence = occurrences[occurrenceId]?.name
 	const vehicleSet = vehicleIds.map(id => vehicles[id]?.label)
 	const staffSet = staffIds.map(id => staff[id]?.label)
-	
+
 	const onSendAlert = () => {
 		invoke('alarm', {
-			occurrence: occurrence,
+			occurrence,
 			staff: staffSet,
 			vehicles: vehicleSet
 		})
 	}
 
 	return (
-	
-		<div className="text-action flex flex-col overflow-hidden">
+
+		<div className='text-action flex flex-col overflow-hidden'>
 			<TableHeader>
 				<Button onClick={onSendAlert}>Enviar Alerta</Button>
 				<Button onClick={onCancel}>Cancelar</Button>
 				<Button onClick={onPrevious}>Voltar</Button>
-				<Button onClick={onNext}>Confirmar</Button>
+				<Button onClick={onNext.bind(null, undefined)}>Confirmar</Button>
 			</TableHeader>
 
 			<p>Tipo de Ocorrência: {occurrence}</p>
@@ -208,14 +210,14 @@ enum Section {
 const usePrevSection = (nextMode: Section, setMode: (s: Section) => void) =>
 	useCallback(setMode.bind(null, nextMode), [])
 
-const useNextSection = <T, >(nextMode: Section, setMode: (s: Section) => void, setValue: (v: T) => void) => 
+const useNextSection = <T, >(nextMode: Section, setMode: (s: Section) => void, setValue: (v: T) => void) =>
 	useCallback((value: T) => {
 		setValue(value)
 		setMode(nextMode)
 	}, [nextMode, setMode, setValue])
 
-interface CreateActiveOccurrenceProps {
-	onClose: () => void
+type CreateActiveOccurrenceProps = {
+	onClose: () => void;
 }
 
 export const CreateActiveOccurrence: FunctionComponent<CreateActiveOccurrenceProps> = ({ onClose }) => {
@@ -227,13 +229,13 @@ export const CreateActiveOccurrence: FunctionComponent<CreateActiveOccurrencePro
 
 	const onOccurrencePrev = onClose
 	const onOccurrenceNext = useNextSection(Section.Vehicles, setActiveSection, setOccurrenceId)
-	
+
 	const onVehiclesPrev = usePrevSection(Section.Occurrence, setActiveSection)
 	const onVehiclesNext = useNextSection(Section.Staff, setActiveSection, setVehicleIds)
 
 	const onStaffPrev = usePrevSection(Section.Vehicles, setActiveSection)
 	const onStaffNext = useNextSection(Section.Confirm, setActiveSection, setStaffIds)
-	
+
 	const onConfirmPrev = usePrevSection(Section.Staff, setActiveSection)
 	const onConfirm = () => {
 		createActiveOccurrence$.next({
@@ -246,10 +248,10 @@ export const CreateActiveOccurrence: FunctionComponent<CreateActiveOccurrencePro
 	}
 
 	return (
-		<FullscreenOverlay className="flex flex-col justify-center items-center">
-			<div className="absolute top-0 left-0 w-full h-full backdrop-blur-md" />
-			
-			<div className="flex bg-[#000] rounded-xl z-10 w-full max-w-7xl max-h-full p-5 pb-10">
+		<FullscreenOverlay className='flex flex-col justify-center items-center'>
+			<div className='absolute top-0 left-0 w-full h-full backdrop-blur-md' />
+
+			<div className='flex bg-[#000] rounded-xl z-10 w-full max-w-7xl max-h-full p-5 pb-10'>
 				{(activeSection === Section.Occurrence) && <PickOccurrence
 					initialValue={occurrenceId}
 					onCancel={onClose}

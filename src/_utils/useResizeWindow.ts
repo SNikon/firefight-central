@@ -1,5 +1,5 @@
-import { LogicalSize, getCurrent } from "@tauri-apps/api/window"
-import { RefObject, useEffect } from "react"
+import { LogicalSize, getCurrent } from '@tauri-apps/api/window'
+import { type RefObject, useEffect } from 'react'
 
 const makeResizeHandler = (addedWidth: number, addedHeight: number): ResizeObserverCallback => entries => {
 	const singleContainer = entries[0]

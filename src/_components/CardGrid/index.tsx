@@ -1,8 +1,8 @@
-import classNames from "classnames";
-import { FunctionComponent, PropsWithChildren } from "react";
+import classNames from 'classnames'
+import { type FunctionComponent, type PropsWithChildren } from 'react'
 
-interface CardGridProps {
-	small?: boolean
+type CardGridProps = {
+	small?: boolean;
 }
 
 export const CardGrid: FunctionComponent<PropsWithChildren<CardGridProps>> = ({ children, small }) => {
@@ -13,4 +13,3 @@ export const CardGrid: FunctionComponent<PropsWithChildren<CardGridProps>> = ({ 
 
 	return <div className={className}>{children}</div>
 }
-	

@@ -1,16 +1,17 @@
-import classNames from "classnames"
-import { FunctionComponent, MouseEventHandler, ReactNode } from "react"
+import classNames from 'classnames'
+import { type FunctionComponent, type MouseEventHandler, type ReactNode } from 'react'
 
-interface ButtonProps {
-	active?: boolean
-	children: ReactNode
-	danger?: boolean
-	disabled?: boolean
-	onClick: MouseEventHandler
+type ButtonProps = {
+	active?: boolean;
+	children: ReactNode;
+	className?: string;
+	danger?: boolean;
+	disabled?: boolean;
+	onClick: MouseEventHandler;
 }
 
-export const Button: FunctionComponent<ButtonProps> = ({ active, children, danger, disabled, onClick }) => {
-	const className = classNames(
+export const Button: FunctionComponent<ButtonProps> = ({ active, children, className, danger, disabled, onClick }) => {
+	const buttonClassName = classNames(
 		'font-bold py-2 px-4 rounded min-w-32', {
 			'bg-button': !active && !danger && !disabled,
 			'bg-buttonActive': active && !danger && !disabled,
@@ -20,12 +21,12 @@ export const Button: FunctionComponent<ButtonProps> = ({ active, children, dange
 			'text-action': !danger && !disabled,
 			'hover:text-actionHighlight': !danger && !disabled,
 			'text-[#fff]': danger,
-			'text-action/20': disabled,
-		})
+			'text-action/20': disabled
+		}, className)
 
 	return (
 		<button
-			className={className}
+			className={buttonClassName}
 			disabled={disabled}
 			onClick={active ? undefined : onClick}
 		>
