@@ -15,7 +15,7 @@ import { OccurrencePanel } from '../_components/OccurrencePanel'
 import { StaffState, VehicleState } from '../../_consts/native'
 import { StaffPanel } from '../_components/StaffPanel'
 import { VehiclePanel } from '../_components/VehiclePanel'
-import { CreateActiveOccurrence } from './CreateActiveOccurrence'
+import { ActiveOccurrenceWizard } from '../_components/ActiveOccurrenceWizard'
 
 export const Overview = () => {
 	const activeOccurrenceMap = useObservable(activeOccurrences$, {})
@@ -93,7 +93,7 @@ export const Overview = () => {
 	}
 
 	return (
-		<div className='bg-body-background text-body-text flex flex-col overflow-hidden'>
+		<div className='bg-background text-primary flex flex-col overflow-hidden'>
 			<TableHeader>
 				<Button onClick={setShowCreateOccurrence.bind(null, true)}>Nova Ocorrência</Button>
 			</TableHeader>
@@ -148,7 +148,7 @@ export const Overview = () => {
 				</CardGrid>
 			</Scrollable>
 
-			{showCreateOccurrence && <Modal><CreateActiveOccurrence onClose={setShowCreateOccurrence.bind(null, false)} /></Modal>}
+			{showCreateOccurrence && <Modal><ActiveOccurrenceWizard onClose={setShowCreateOccurrence.bind(null, false)} /></Modal>}
 			{showViewOccurrence && <Modal><OccurrencePanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewOccurrence)} /></Modal>}
 			{showViewStaff && <Modal><StaffPanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewStaff)} /></Modal>}
 			{showViewVehicle && <Modal><VehiclePanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewVehicle)} /></Modal>}

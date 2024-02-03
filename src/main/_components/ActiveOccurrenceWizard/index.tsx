@@ -1,24 +1,24 @@
 import { type FunctionComponent, useCallback, useMemo, useState } from 'react'
 import { useObservable } from 'react-use'
 import { invoke } from '@tauri-apps/api'
-import { CardGrid } from '../../_components/CardGrid'
-import { Scrollable } from '../../_components/Scrollable'
-import { TableHeader } from '../_components/TableHeader'
-import { Button } from '../../_components/Button'
-import { createActiveOccurrence$, occurrences$, staff$, vehicles$ } from '../../_state/store'
-import { OccurrenceCard } from '../../_components/OccurrenceCard'
-import { VehicleCard } from '../../_components/VehicleCard'
-import { vehicleSortByOcurrenceState } from '../../_utils/vehicleSort'
-import { occurrenceSortByLabel } from '../../_utils/occurrenceSort'
-import { staffSortByOccurrenceState } from '../../_utils/staffSort'
-import { StaffCard } from '../../_components/StaffCard'
-import { FullscreenOverlay } from '../../_components/FullScreenOverlay'
+import { CardGrid } from '../../../_components/CardGrid'
+import { Scrollable } from '../../../_components/Scrollable'
+import { TableHeader } from '../TableHeader'
+import { Button } from '../../../_components/Button'
+import { createActiveOccurrence$, occurrences$, staff$, vehicles$ } from '../../../_state/store'
+import { OccurrenceCard } from '../../../_components/OccurrenceCard'
+import { VehicleCard } from '../../../_components/VehicleCard'
+import { vehicleSortByOcurrenceState } from '../../../_utils/vehicleSort'
+import { occurrenceSortByLabel } from '../../../_utils/occurrenceSort'
+import { staffSortByOccurrenceState } from '../../../_utils/staffSort'
+import { StaffCard } from '../../../_components/StaffCard'
+import { FullscreenOverlay } from '../../../_components/FullScreenOverlay'
 
 type SectionProps<T> = {
 	initialValue: T;
 	onCancel: () => void;
 	onNext: (value: T) => void;
-	onPrevious: () => void;
+	onPrevious?: () => void;
 }
 
 type PickOccurrenceProps = SectionProps<string>
@@ -80,8 +80,8 @@ const PickVehicles: FunctionComponent<PickVehiclesProps> = ({ initialValue, onCa
 		<div className='text-action flex flex-col overflow-hidden'>
 			<TableHeader>
 				<Button onClick={onCancel}>Cancelar</Button>
-				<Button onClick={onPrevious}>Voltar</Button>
-				<Button onClick={onConfirm}>Continuar</Button>
+				{onPrevious && <Button onClick={onPrevious}>Voltar</Button>}
+				<Button onClick={onConfirm}>Seguinte</Button>
 			</TableHeader>
 			<Scrollable>
 				<CardGrid>
@@ -131,7 +131,7 @@ const PickStaff: FunctionComponent<PickStaffProps> = ({ initialValue, onCancel, 
 			<TableHeader>
 				<Button onClick={onCancel}>Cancelar</Button>
 				<Button onClick={onPrevious}>Voltar</Button>
-				<Button onClick={onNext.bind(null, selected)}>Continuar</Button>
+				<Button onClick={onNext.bind(null, selected)}>Seguinte</Button>
 			</TableHeader>
 			<Scrollable>
 				<CardGrid>
@@ -184,7 +184,6 @@ const ConfirmOccurrence: FunctionComponent<ConfirmOccurrenceProps> = ({
 	}
 
 	return (
-
 		<div className='text-action flex flex-col overflow-hidden'>
 			<TableHeader>
 				<Button onClick={onSendAlert}>Enviar Alerta</Button>
@@ -216,12 +215,13 @@ const useNextSection = <T, >(nextMode: Section, setMode: (s: Section) => void, s
 		setMode(nextMode)
 	}, [nextMode, setMode, setValue])
 
-type CreateActiveOccurrenceProps = {
-	onClose: () => void;
+type ActiveOccurrenceWizardProps = {
+	internalId?: string
+	onClose: () => void
 }
 
-export const CreateActiveOccurrence: FunctionComponent<CreateActiveOccurrenceProps> = ({ onClose }) => {
-	const [activeSection, setActiveSection] = useState(Section.Occurrence)
+export const ActiveOccurrenceWizard: FunctionComponent<ActiveOccurrenceWizardProps> = ({ internalId, onClose }) => {
+	const [activeSection, setActiveSection] = useState(internalId ? Section.Occurrence : Section.Vehicles)
 
 	const [occurrenceId, setOccurrenceId] = useState('')
 	const [vehicleIds, setVehicleIds] = useState<string[]>([])
@@ -252,7 +252,7 @@ export const CreateActiveOccurrence: FunctionComponent<CreateActiveOccurrencePro
 			<div className='absolute top-0 left-0 w-full h-full backdrop-blur-md' />
 
 			<div className='flex bg-[#000] rounded-xl z-10 w-full max-w-7xl max-h-full p-5 pb-10'>
-				{(activeSection === Section.Occurrence) && <PickOccurrence
+				{!internalId && (activeSection === Section.Occurrence) && <PickOccurrence
 					initialValue={occurrenceId}
 					onCancel={onClose}
 					onNext={onOccurrenceNext}
@@ -262,7 +262,7 @@ export const CreateActiveOccurrence: FunctionComponent<CreateActiveOccurrencePro
 					initialValue={vehicleIds}
 					onCancel={onClose}
 					onNext={onVehiclesNext}
-					onPrevious={onVehiclesPrev}
+					onPrevious={internalId ? undefined : onVehiclesPrev}
 				/>}
 				{(activeSection === Section.Staff) && <PickStaff
 					initialValue={staffIds}

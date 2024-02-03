@@ -12,7 +12,7 @@ type ButtonProps = {
 
 export const Button: FunctionComponent<ButtonProps> = ({ active, children, className, danger, disabled, onClick }) => {
 	const buttonClassName = classNames(
-		'font-bold py-2 px-4 rounded min-w-32', {
+		'h-min font-bold py-2 px-4 rounded min-w-32 min-h-10', {
 			'bg-button': !active && !danger && !disabled,
 			'bg-buttonActive': active && !danger && !disabled,
 			'bg-danger': danger,

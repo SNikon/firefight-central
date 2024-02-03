@@ -1,4 +1,4 @@
-import { type FunctionComponent, useMemo } from 'react'
+import { type FunctionComponent, useMemo, useState } from 'react'
 import { useObservable } from 'react-use'
 import { activeOccurrences$, deleteActiveOccurrence$, occurrences$, staff$, vehicles$ } from '../../../_state/store'
 import { Button } from '../../../_components/Button'
@@ -8,6 +8,8 @@ import { vehicleSortByLabel } from '../../../_utils/vehicleSort'
 import { CardGrid } from '../../../_components/CardGrid'
 import { VehicleCard } from '../../../_components/VehicleCard'
 import { StaffCard } from '../../../_components/StaffCard'
+import { Modal } from '../../../_components/Modal'
+import { ActiveOccurrenceWizard } from '../ActiveOccurrenceWizard'
 
 type OccurrencePanelProps = {
 	internalId: string;
@@ -41,16 +43,10 @@ export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ inter
 		deleteActiveOccurrence$.next(internalId)
 		onClose()
 	}
-
-	const onAdd = () => {
-		// TODO
-	}
-
-	const onRemove = () => {
-		// TODO
-	}
-
-	return <div className='absolute top-0 left-0 flex flex-col w-full h-full z-10 select-none bg-[#000] text-primary p-5'>
+	
+	const [showCreateOccurrence, setShowCreateOccurrence] = useState(false)
+	
+	return <div className='absolute top-0 left-0 flex flex-col w-full h-full z-10 select-none bg-background text-primary p-5'>
 		<div className='flex flex-row justify-between'>
 			<div className='text-2xl font-extrabold'>
 				Gerir ocorrência - {occurrence.name}
@@ -98,9 +94,10 @@ export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ inter
 
 		<div className='space-x-5 pt-5'>
 			<Button onClick={onClose}>Voltar atrás</Button>
-			<Button onClick={onAdd}>Adicionar recursos</Button>
-			<Button onClick={onRemove}>Remover recursos</Button>
+			<Button onClick={setShowCreateOccurrence.bind(null, true)}>Alterar recursos</Button>
 			<Button onClick={onDelete}>Fechar ocorrência</Button>
 		</div>
+
+		{showCreateOccurrence && <Modal><ActiveOccurrenceWizard internalId={internalId} onClose={setShowCreateOccurrence.bind(null, false)} /></Modal>}
 	</div>
 }

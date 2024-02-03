@@ -1,4 +1,4 @@
-import { type FunctionComponent } from 'react'
+import { FocusEventHandler, type FunctionComponent } from 'react'
 import classNames from 'classnames'
 import { type VehicleState } from '../../_consts/native'
 import { vehicleStateToLocale } from '../../_utils/vehicleStateToLocale'
@@ -28,9 +28,13 @@ export const VehicleCard: FunctionComponent<VehicleCardProps> = props => {
 		: props.onClick.bind(null, props.internalId)
 	const imgSource = props.image?.trim() || vehicleSample
 
+	const onFocus: FocusEventHandler<HTMLButtonElement> = evt => {
+		evt.target.scrollIntoView({ behavior: 'smooth', block: 'nearest'})
+	}
+
 	return (
 		<div className={containerClassName}>
-			<button disabled={props.disabled} className={className} onClick={clickHandler}>
+			<button disabled={props.disabled} className={className} onClick={clickHandler} onFocus={onFocus}>
 				<div className='rounded relative flex flex-1 flex-col w-full h-full overflow-hidden justify-center items-center'>
 					{!props.small && (
 						<div className='flex flex-col align-middle justify-center overflow-hidden rounded'>
