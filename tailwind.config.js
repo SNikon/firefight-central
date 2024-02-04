@@ -1,10 +1,10 @@
-const colors = require('tailwindcss/colors')
+import colors from 'tailwindcss/colors'
 
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{html,tsx,ts,jsx,js}"
+    './index.html',
+    './src/**/*.{html,tsx,ts,jsx,js}'
   ],
   theme: {
     colors: {

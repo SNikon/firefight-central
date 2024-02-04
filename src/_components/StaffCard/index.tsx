@@ -1,10 +1,10 @@
 import { type FunctionComponent } from 'react'
+import classNames from 'classnames'
 import { type StaffState } from '../../_consts/native'
 import { staffStateToLocale } from '../../_utils/staffStateToLocale'
 import staffSample from '../../_assets/staff_sample.jpg'
 import check from '../../_assets/check-solid.svg'
 import { getCardClassForStates } from '../../_utils/cardStyle'
-import classNames from 'classnames'
 import { shortenName } from '../../_utils/shortenName'
 import { defaultToNbSp } from '../../_utils/defaultToNbsp'
 

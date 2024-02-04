@@ -1,6 +1,6 @@
 import { type FunctionComponent, useEffect, useState } from 'react'
-import { type Staff, StaffState } from '../../../_consts/native'
 import { useObservable } from 'react-use'
+import { type Staff, StaffState } from '../../../_consts/native'
 import { createStaff$, deleteStaff$, staff$, updateStaff$ } from '../../../_state/store'
 import { Button } from '../../../_components/Button'
 

@@ -1,10 +1,10 @@
 import { type FunctionComponent } from 'react'
+import classNames from 'classnames'
 import { type VehicleState } from '../../_consts/native'
 import { vehicleStateToLocale } from '../../_utils/vehicleStateToLocale'
 import vehicleSample from '../../_assets/vehicle_sample.jpg'
 import check from '../../_assets/check-solid.svg'
 import { getCardClassForStates } from '../../_utils/cardStyle'
-import classNames from 'classnames'
 
 type VehicleCardProps = {
 	disabled?: boolean;

@@ -1,7 +1,7 @@
 import { useObservable } from 'react-use'
+import { type MouseEventHandler } from 'react'
 import { Button } from '../../../_components/Button'
 import { View, activeView$, changeView$, openSettings$ } from '../../../_state/view'
-import { type MouseEventHandler } from 'react'
 
 const onOverview = () => {
 	changeView$.next(View.Overview)
