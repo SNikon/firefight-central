@@ -9,15 +9,15 @@ import { shortenName } from '../../_utils/shortenName'
 import { defaultToNbSp } from '../../_utils/defaultToNbsp'
 
 type StaffCardProps = {
-	disabled?: boolean;
-	image?: string;
-	internalId: string;
-	label: string;
-	name: string;
-	onClick?: (internalId: string) => void;
-	selected?: boolean;
-	small?: boolean;
-	state: StaffState;
+	disabled?: boolean
+	image?: string
+	internalId: string
+	label: string
+	name: string
+	onClick?: (internalId: string) => void
+	selected?: boolean
+	small?: boolean
+	state: StaffState
 }
 
 export const StaffCard: FunctionComponent<StaffCardProps> = props => {

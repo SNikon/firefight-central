@@ -133,6 +133,7 @@ fn main() {
             firefight::commands::delete_occurrence,
             firefight::commands::delete_staff,
             firefight::commands::delete_vehicle,
+            torii::commands::open_fvp,
             torii::commands::open_settings
         ])
         .run(tauri::generate_context!())

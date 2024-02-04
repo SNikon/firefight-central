@@ -8,7 +8,7 @@ pub struct Occurrence {
 	pub name: String
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum StaffState {
 	Available,
@@ -26,7 +26,7 @@ pub struct Staff {
 	pub state: StaffState
 }
 
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum VehicleState {
 	Available,

@@ -6,11 +6,11 @@ import { Button } from '../Button'
 const entryClasses = 'w-full px-2 flex items-center justify-start text-left whitespace-nowrap'
 
 type ActiveOccurrenceCardProps = {
-	internalId: string;
-	occurrenceId: string;
-	onClick: (internalId: string) => void;
-	staffIds: string[];
-	vehicleIds: string[];
+	internalId: string
+	occurrenceId: string
+	onClick: (internalId: string) => void
+	staffIds: string[]
+	vehicleIds: string[]
 }
 
 export const ActiveOccurrenceCard: FunctionComponent<ActiveOccurrenceCardProps> = ({

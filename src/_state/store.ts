@@ -5,10 +5,10 @@ import { type ActiveOccurrence, type Occurrence, type Staff, type Vehicle } from
 import { bindCreator$, bindDeleter$, bindUpdater$ } from './store.impl'
 
 export type State = {
-	activeOccurrences: Record<string, ActiveOccurrence>;
-	occurrences: Record<string, Occurrence>;
-	vehicles: Record<string, Vehicle>;
-	staff: Record<string, Staff>;
+	activeOccurrences: Record<string, ActiveOccurrence>
+	occurrences: Record<string, Occurrence>
+	vehicles: Record<string, Vehicle>
+	staff: Record<string, Staff>
 }
 
 export const store$ = new ReplaySubject<State>(1)
@@ -30,7 +30,7 @@ export const updatingState$ = new BehaviorSubject<boolean>(false)
 
 export const createActiveOccurrence$ = new Subject<ActiveOccurrence>()
 export const activeOccurrenceCreated$ = new Subject<string>()
-bindCreator$(createActiveOccurrence$, updatingState$, 'create_active_occurrence', 'occurrence')
+bindCreator$(createActiveOccurrence$, updatingState$, 'create_active_occurrence', 'activeOccurrence')
 export const createOccurrence$ = new Subject<Occurrence>()
 export const occurrenceCreated$ = new Subject<string>()
 bindCreator$(createOccurrence$, updatingState$, 'create_occurrence', 'occurrence')
@@ -42,7 +42,7 @@ export const staffCreated$ = new Subject<string>()
 bindCreator$(createStaff$, updatingState$, 'create_staff', 'staff')
 
 export const updateActiveOccurrence$ = new Subject<ActiveOccurrence>()
-bindUpdater$(updateActiveOccurrence$, updatingState$, 'update_active_occurrence', 'occurrence')
+bindUpdater$(updateActiveOccurrence$, updatingState$, 'update_active_occurrence', 'activeOccurrence')
 export const updateOccurrence$ = new Subject<Occurrence>()
 bindUpdater$(updateOccurrence$, updatingState$, 'update_occurrence', 'occurrence')
 export const updateVehicle$ = new Subject<Vehicle>()

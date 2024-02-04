@@ -7,14 +7,14 @@ import check from '../../_assets/check-solid.svg'
 import { getCardClassForStates } from '../../_utils/cardStyle'
 
 type VehicleCardProps = {
-	disabled?: boolean;
-	internalId: string;
-	image?: string;
-	label: string;
-	onClick?: (internalId: string) => void;
-	selected?: boolean;
-	small?: boolean;
-	state: VehicleState;
+	disabled?: boolean
+	internalId: string
+	image?: string
+	label: string
+	onClick?: (internalId: string) => void
+	selected?: boolean
+	small?: boolean
+	state: VehicleState
 }
 
 export const VehicleCard: FunctionComponent<VehicleCardProps> = props => {

@@ -10,10 +10,14 @@ import { VehicleCard } from '../../../_components/VehicleCard'
 import { StaffCard } from '../../../_components/StaffCard'
 import { Modal } from '../../../_components/Modal'
 import { ActiveOccurrenceWizard } from '../ActiveOccurrenceWizard'
+import { Header, HeaderSection } from '../../../_components/Header'
+import { useEscapeKey } from '../../../_utils/useEscapeKey'
+import { useAlertSelection } from '../../../_utils/useAlertSelection'
+import { sendAlert } from '../../../_utils/sendAlert'
 
 type OccurrencePanelProps = {
-	internalId: string;
-	onClose: () => void;
+	internalId: string
+	onClose: () => void
 }
 
 export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ internalId, onClose }) => {
@@ -28,13 +32,15 @@ export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ inter
 	const vehicleIds = activeOccurrence.vehicleIds ?? []
 
 	const sortedVehicles = useMemo(() => {
-		const entrySet = vehicleIds.map(id => vehicleMap[id])
+		// TODO Remove filter once entries removed correctly from ocurrences
+		const entrySet = vehicleIds.map(id => vehicleMap[id]).filter(Boolean)
 		entrySet.sort(vehicleSortByLabel)
 		return entrySet
 	}, [vehicleMap])
 
 	const sortedStaff = useMemo(() => {
-		const entrySet = staffIds.map(id => staffMap[id])
+		// TODO Remove filter once entries removed correctly from ocurrences
+		const entrySet = staffIds.map(id => staffMap[id]).filter(Boolean)
 		entrySet.sort(staffSortByLabel)
 		return entrySet
 	}, [staffMap])
@@ -44,16 +50,54 @@ export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ inter
 		onClose()
 	}
 	
+	const {
+		onEndSelection,
+		selectedStaff,
+		selectedVehicles,
+		showSelection,
+		onStartSelection,
+		onToggleStaff,
+		onToggleVehicle
+	} = useAlertSelection(activeOccurrence.staffIds, activeOccurrence.vehicleIds)
+
+	const onSendAlert = () => {
+		if (selectedStaff.length || selectedVehicles.length) {
+			const occurrenceName = occurrence.name			
+			const vehicleLabels = selectedVehicles.map(id => vehicleMap[id]?.label)
+			const staffLabels = selectedStaff.map(id => staffMap[id]?.label)
+		
+			sendAlert(occurrenceName, staffLabels, vehicleLabels)
+		}
+		
+		onEndSelection()
+	}
+
 	const [showCreateOccurrence, setShowCreateOccurrence] = useState(false)
+	useEscapeKey(onClose, showCreateOccurrence || showSelection)
+	useEscapeKey(onEndSelection, !showSelection)
 	
-	return <div className='absolute top-0 left-0 flex flex-col w-full h-full z-10 select-none bg-background text-primary p-5'>
-		<div className='flex flex-row justify-between'>
+	return <div className='absolute top-0 left-0 flex flex-col w-full h-full z-10 select-none bg-background text-primary pb-5'>
+		<Header className='bg-backgroundEmphasis mb-5'>
+			<HeaderSection>
+				{!showSelection && <Button onClick={onClose}>Voltar atrás</Button>}
+			</HeaderSection>
+
+			<HeaderSection>
+				{!showSelection && <Button onClick={onStartSelection}>Enviar alerta</Button>}
+				{!showSelection && <Button onClick={setShowCreateOccurrence.bind(null, true)}>Alterar recursos</Button>}
+				{!showSelection && <Button onClick={onDelete}>Fechar ocorrência</Button>}
+				{showSelection && <Button onClick={onEndSelection}>Cancelar alerta</Button>}
+				{showSelection && <Button onClick={onSendAlert}>Confirmar alerta</Button>}
+			</HeaderSection>
+		</Header>
+
+		<div className='flex flex-row justify-between px-5'>
 			<div className='text-2xl font-extrabold'>
 				Gerir ocorrência - {occurrence.name}
 			</div>
 		</div>
 
-		<Scrollable>
+		<Scrollable className='px-5'>
 			<h2 className='px-5 my-5 text-actionHighlight font-extrabold text-2xl'>
 				Veículos
 			</h2>
@@ -62,11 +106,13 @@ export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ inter
 				{sortedVehicles.map(vehicle => (
 					<VehicleCard
 						key={vehicle.internalId}
-						disabled
+						disabled={!showSelection}
 						label={vehicle.label}
 						image={vehicle.image}
 						internalId={vehicle.internalId}
+						onClick={onToggleVehicle}
 						small
+						selected={selectedVehicles.includes(vehicle.internalId)}
 						state={vehicle.state}
 					/>
 				))}
@@ -80,24 +126,25 @@ export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ inter
 				{sortedStaff.map(staff => (
 					<StaffCard
 						key={staff.internalId}
-						disabled
+						disabled={!showSelection}
 						label={staff.label}
 						image={staff.image}
 						internalId={staff.internalId}
 						name={staff.name}
+						onClick={onToggleStaff}
 						small
+						selected={selectedStaff.includes(staff.internalId)}
 						state={staff.state}
 					/>
 				))}
 			</CardGrid>
 		</Scrollable>
 
-		<div className='space-x-5 pt-5'>
-			<Button onClick={onClose}>Voltar atrás</Button>
-			<Button onClick={setShowCreateOccurrence.bind(null, true)}>Alterar recursos</Button>
-			<Button onClick={onDelete}>Fechar ocorrência</Button>
-		</div>
-
-		{showCreateOccurrence && <Modal><ActiveOccurrenceWizard internalId={internalId} onClose={setShowCreateOccurrence.bind(null, false)} /></Modal>}
+		{showCreateOccurrence && <Modal>
+			<ActiveOccurrenceWizard
+				internalId={internalId}
+				onClose={setShowCreateOccurrence.bind(null, false)}
+			/>
+		</Modal>}
 	</div>
 }

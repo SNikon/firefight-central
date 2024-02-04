@@ -3,10 +3,10 @@ import classNames from 'classnames'
 import { getCardClassForStates } from '../../_utils/cardStyle'
 
 type OccurrenceCardProps = {
-	internalId: string;
-	name: string;
-	onClick: (internalId: string) => void;
-	selected?: boolean;
+	internalId: string
+	name: string
+	onClick: (internalId: string) => void
+	selected?: boolean
 }
 
 export const OccurrenceCard: FunctionComponent<OccurrenceCardProps> = props => {

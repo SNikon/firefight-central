@@ -2,12 +2,12 @@ import classNames from 'classnames'
 import { type FunctionComponent, type MouseEventHandler, type ReactNode } from 'react'
 
 type ButtonProps = {
-	active?: boolean;
-	children: ReactNode;
-	className?: string;
-	danger?: boolean;
-	disabled?: boolean;
-	onClick: MouseEventHandler;
+	active?: boolean
+	children: ReactNode
+	className?: string
+	danger?: boolean
+	disabled?: boolean
+	onClick: MouseEventHandler
 }
 
 export const Button: FunctionComponent<ButtonProps> = ({ active, children, className, danger, disabled, onClick }) => {

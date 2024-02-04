@@ -4,7 +4,7 @@ import { type FunctionComponent, type PropsWithChildren } from 'react'
 const style = { scrollbarGutter: 'stable' }
 
 type ScrollableProps = {
-	className?: string;
+	className?: string
 }
 
 export const Scrollable: FunctionComponent<PropsWithChildren<ScrollableProps>> = ({ children, className }) =>

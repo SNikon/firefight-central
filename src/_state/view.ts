@@ -12,8 +12,8 @@ export const activeView$ = merge(of(View.Overview), changeView$)
 	.pipe(distinctUntilChanged())
 
 type WindowAnchor = {
-	left: number;
-	top: number;
+	left: number
+	top: number
 }
 
 export const openSettings$ = new Subject<WindowAnchor>()

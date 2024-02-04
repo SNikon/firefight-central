@@ -3,6 +3,7 @@ import { useObservable } from 'react-use'
 import { type Vehicle, VehicleState } from '../../../_consts/native'
 import { createVehicle$, deleteVehicle$, updateVehicle$, vehicles$ } from '../../../_state/store'
 import { Button } from '../../../_components/Button'
+import { useEscapeKey } from '../../../_utils/useEscapeKey'
 
 const stateOptions = [
 	{ value: VehicleState.Available, label: 'Disponível' },
@@ -10,8 +11,8 @@ const stateOptions = [
 ]
 
 type VehiclePanelProps = {
-	internalId: string | undefined;
-	onClose: () => void;
+	internalId: string | undefined
+	onClose: () => void
 }
 
 export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId, onClose }) => {
@@ -27,8 +28,6 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 		setVehicleState(e.target.value as VehicleState)
 	}
 
-	const [vehicleImage, setVehicleImage] = useState('')
-	// Const onVehicleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => setVehicleImage(e.target.value)
 	const canSave = Boolean(vehicleId.trim())
 
 	useEffect(() => {
@@ -39,7 +38,6 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 
 		setVehicleId(vehicle.label)
 		setVehicleState(vehicle.state)
-		setVehicleImage(vehicle.image)
 	}, [internalId, vehicleMap])
 
 	const onSave = () => {
@@ -47,7 +45,7 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 			internalId: internalId ?? '',
 			label: vehicleId,
 			state: vehicleState,
-			image: vehicleImage
+			image: ''
 		} satisfies Vehicle
 
 		const tg$ = internalId ? updateVehicle$ : createVehicle$
@@ -57,13 +55,15 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 	}
 
 	const onDelete = () => {
-		if (internalId === null) {
+		if (!internalId) {
 			return
 		}
 
 		deleteVehicle$.next(internalId)
 		onClose()
 	}
+
+	useEscapeKey(onClose)
 
 	return <div className='absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full z-10 select-none'>
 		<div className='absolute top-0 left-0 w-full h-full backdrop-blur-md' />

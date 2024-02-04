@@ -1,15 +1,15 @@
 
 export type ActiveOccurrence = {
-	internalId: string;
-	occurrenceId: string;
-	vehicleIds: string[];
-	staffIds: string[];
+	internalId: string
+	occurrenceId: string
+	vehicleIds: string[]
+	staffIds: string[]
 }
 
 export type Occurrence = {
-	internalId: string;
-	image: string;
-	name: string;
+	internalId: string
+	image: string
+	name: string
 }
 
 export enum VehicleState {
@@ -19,10 +19,10 @@ export enum VehicleState {
 }
 
 export type Vehicle = {
-	internalId: string;
-	image: string;
-	label: string;
-	state: VehicleState;
+	internalId: string
+	image: string
+	label: string
+	state: VehicleState
 }
 
 export enum StaffState {
@@ -32,9 +32,9 @@ export enum StaffState {
 }
 
 export type Staff = {
-	internalId: string;
-	image: string;
-	label: string;
-	name: string;
-	state: StaffState;
+	internalId: string
+	image: string
+	label: string
+	name: string
+	state: StaffState
 }
