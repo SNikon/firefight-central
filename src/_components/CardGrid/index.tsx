@@ -2,7 +2,7 @@ import classNames from 'classnames'
 import { type FunctionComponent, type PropsWithChildren } from 'react'
 
 type CardGridProps = {
-	small?: boolean;
+	small?: boolean
 }
 
 export const CardGrid: FunctionComponent<PropsWithChildren<CardGridProps>> = ({ children, small }) => {

@@ -3,7 +3,7 @@ use anyhow::Context;
 use tauri::AppHandle;
 use tauri_plugin_store::StoreBuilder;
 
-use super::types::{DataStore, Vehicle, ActiveOccurrence, Staff, Occurrence, FirefightDataManager};
+use super::types::{ActiveOccurrence, DataStore, FirefightDataManager, Occurrence, Staff, StaffState, Vehicle, VehicleState};
 
 pub type LocalStore = tauri_plugin_store::Store<tauri::Wry>;
 
@@ -159,7 +159,7 @@ impl FirefightDataManager for LocalStore {
 		
 		occurrence.vehicle_ids.iter().for_each(|vehicle_id| {
 			let vehicle = vehicle_store.get_mut(vehicle_id).with_context(|| format!("Failed to get vehicle with id: {}", vehicle_id)).unwrap();
-			vehicle.state = super::types::VehicleState::Dispatched;
+			vehicle.state = VehicleState::Dispatched;
 		});
 
 		self.insert(String::from("vehicles"), serde_json::json!(vehicle_store)).with_context(|| format!("Failed to update vehicles with value {:?}", vehicle_store))?;
@@ -170,7 +170,7 @@ impl FirefightDataManager for LocalStore {
 
 		occurrence.staff_ids.iter().for_each(|staff_id| {
 			let staff = staff_store.get_mut(staff_id).with_context(|| format!("Failed to get staff with id: {}", staff_id)).unwrap();
-			staff.state = super::types::StaffState::Dispatched;
+			staff.state = StaffState::Dispatched;
 		});
 
 		self.insert(String::from("staff"), serde_json::json!(staff_store)).with_context(|| format!("Failed to update staff with value {:?}", staff_store))?;
@@ -237,12 +237,12 @@ impl FirefightDataManager for LocalStore {
 		
 		removed_vehicles.iter().for_each(|vehicle_id| {
 			let vehicle = vehicle_store.get_mut(*vehicle_id).with_context(|| format!("Failed to get vehicle with id: {}", vehicle_id)).unwrap();
-			vehicle.state = super::types::VehicleState::Available;
+			vehicle.state = VehicleState::Available;
 		});
 
 		active_occurrence.vehicle_ids.iter().for_each(|vehicle_id| {
 			let vehicle = vehicle_store.get_mut(vehicle_id).with_context(|| format!("Failed to get vehicle with id: {}", vehicle_id)).unwrap();
-			vehicle.state = super::types::VehicleState::Dispatched;
+			vehicle.state = VehicleState::Dispatched;
 		});
 
 		self.insert(String::from("vehicles"), serde_json::json!(vehicle_store)).with_context(|| format!("Failed to update vehicles with value {:?}", vehicle_store))?;
@@ -253,12 +253,12 @@ impl FirefightDataManager for LocalStore {
 
 		removed_staff.iter().for_each(|staff_id| {
 			let staff = staff_store.get_mut(*staff_id).with_context(|| format!("Failed to get staff with id: {}", staff_id)).unwrap();
-			staff.state = super::types::StaffState::Available;
+			staff.state = StaffState::Available;
 		});
 
 		active_occurrence.staff_ids.iter().for_each(|staff_id| {
 			let staff = staff_store.get_mut(staff_id).with_context(|| format!("Failed to get staff with id: {}", staff_id)).unwrap();
-			staff.state = super::types::StaffState::Dispatched;
+			staff.state = StaffState::Dispatched;
 		});
 		self.insert(String::from("staff"), serde_json::json!(staff_store)).with_context(|| format!("Failed to update staff with value {:?}", staff_store))?;
 		
@@ -315,8 +315,9 @@ impl FirefightDataManager for LocalStore {
 			let mut vehicle_store = serde_json::from_value::<HashMap<String, Vehicle>>(vehicles_value).with_context(|| format!("Failed to deserialize vehicles"))?;
 			
 			active_ocurrence.vehicle_ids.iter().for_each(|vehicle_id| {
-				let vehicle = vehicle_store.get_mut(vehicle_id).with_context(|| format!("Failed to get vehicle with id: {}", vehicle_id)).unwrap();
-				vehicle.state = super::types::VehicleState::Available;
+				if let Some(vehicle) = vehicle_store.get_mut(vehicle_id) {
+					vehicle.state = VehicleState::Available;
+				}
 			});
 
 			self.insert(String::from("vehicles"), serde_json::json!(vehicle_store)).with_context(|| format!("Failed to update vehicles with value {:?}", vehicle_store))?;
@@ -326,8 +327,9 @@ impl FirefightDataManager for LocalStore {
 			let mut staff_store = serde_json::from_value::<HashMap<String, Staff>>(staff_value).with_context(|| format!("Failed to deserialize staff"))?;
 
 			active_ocurrence.staff_ids.iter().for_each(|staff_id| {
-				let staff = staff_store.get_mut(staff_id).with_context(|| format!("Failed to get staff with id: {}", staff_id)).unwrap();
-				staff.state = super::types::StaffState::Available;
+				if let Some(staff) = staff_store.get_mut(staff_id) {
+					staff.state = StaffState::Available;
+				}
 			});
 
 			self.insert(String::from("staff"), serde_json::json!(staff_store)).with_context(|| format!("Failed to update staff with value {:?}", staff_store))?;
@@ -354,9 +356,24 @@ impl FirefightDataManager for LocalStore {
 		let staff_value = self.get("staff").with_context(|| format!("Unable to read staff from store"))?.clone();
 		let mut staff_store = serde_json::from_value::<HashMap<String, Staff>>(staff_value).with_context(|| format!("Failed to deserialize staff"))?;
 
-		staff_store.remove(&staff_id);
-
+		let removed_entry = staff_store.remove(&staff_id);
 		self.insert(String::from("staff"), serde_json::json!(staff_store)).with_context(|| format!("Failed to delete staff {}", staff_id))?;
+		
+		if let Some(remove_staff) = removed_entry {
+			if remove_staff.state == StaffState::Dispatched {
+				// Update active occurrence
+				let active_occurrence_value = self.get("active_occurrences").with_context(|| format!("Unable to read active occurrences from store"))?.clone();
+				let mut active_occurrence_store = serde_json::from_value::<HashMap<String, ActiveOccurrence>>(active_occurrence_value).with_context(|| format!("Failed to deserialize active occurrences"))?;
+
+				if let Some(active_occurrence) = active_occurrence_store.values_mut().find(|active_occurrence| active_occurrence.staff_ids.contains(&staff_id)) {
+					let staff_idx = active_occurrence.staff_ids.iter().position(|id| id == &staff_id);
+					active_occurrence.staff_ids.swap_remove(staff_idx.unwrap());
+				}
+				
+				self.insert(String::from("active_occurrences"), serde_json::json!(active_occurrence_store)).with_context(|| format!("Failed to update active occurrences with value {:?}", active_occurrence_store))?;
+			}
+		}
+	
 		self.save().with_context(|| format!("Failed to save store while deleting staff"))?;
 
 		Ok(())
@@ -366,9 +383,24 @@ impl FirefightDataManager for LocalStore {
 		let vehicles_value = self.get("vehicles").with_context(|| format!("Unable to read vehicles from store"))?.clone();
 		let mut vehicle_store = serde_json::from_value::<HashMap<String, Vehicle>>(vehicles_value).with_context(|| format!("Failed to deserialize vehicles"))?;
 
-		vehicle_store.remove(&vehicle_id);
-
+		let removed_entry = vehicle_store.remove(&vehicle_id);
 		self.insert(String::from("vehicles"), serde_json::json!(vehicle_store)).with_context(|| format!("Failed to delete vehicle {}", vehicle_id))?;
+		
+		if let Some(removed_vehicle) = removed_entry {
+			if removed_vehicle.state == VehicleState::Dispatched {
+				// Update active occurrence
+				let active_occurrence_value = self.get("active_occurrences").with_context(|| format!("Unable to read active occurrences from store"))?.clone();
+				let mut active_occurrence_store = serde_json::from_value::<HashMap<String, ActiveOccurrence>>(active_occurrence_value).with_context(|| format!("Failed to deserialize active occurrences"))?;
+
+				if let Some(active_occurrence) = active_occurrence_store.values_mut().find(|active_occurrence| active_occurrence.vehicle_ids.contains(&vehicle_id)) {
+					let vehicle_idx = active_occurrence.vehicle_ids.iter().position(|id| id == &vehicle_id);
+					active_occurrence.vehicle_ids.swap_remove(vehicle_idx.unwrap());
+				}
+				
+				self.insert(String::from("active_occurrences"), serde_json::json!(active_occurrence_store)).with_context(|| format!("Failed to update active occurrences with value {:?}", active_occurrence_store))?;
+			}
+		}
+		
 		self.save().with_context(|| format!("Failed to save store while deleting vehicle"))?;
 
 		Ok(())

@@ -10,7 +10,8 @@ module.exports = {
 		'plugin:import/recommended',
 		'plugin:import/typescript',
 		'plugin:react/recommended',
-		'plugin:react/jsx-runtime'
+		'plugin:react/jsx-runtime',
+		'plugin:@stylistic/disable-legacy'
 	],
 	parser: '@typescript-eslint/parser',
 	parserOptions: {
@@ -32,16 +33,24 @@ module.exports = {
 	],
 	plugins: [
 		'@stylistic',
+		'@stylistic/ts',
 		'@typescript-eslint',
 		'import',
 		'react'
 	],
 	reportUnusedDisableDirectives: true,
 	rules: {
+		'@stylistic/ts/member-delimiter-style': ['warn', {
+			multiline: { delimiter: 'none', requireLast: false },
+			singleline: { delimiter: 'comma', requireLast: false }
+		}],
+		'@stylistic/ts/semi': ['warn', 'never'],
 		'import/order': 'warn',
+		'indent': ['warn', 'tab'],
 		'no-unused-vars': 'off',
 		'quotes': ['warn', 'single'],
-		'semi': ['warn', 'never']
+		'react/jsx-indent': ['warn', 'tab'],
+		'semi': ['warn', 'never'],
 	},
 	settings: {
 		react: {

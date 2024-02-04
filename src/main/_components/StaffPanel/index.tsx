@@ -3,6 +3,7 @@ import { useObservable } from 'react-use'
 import { type Staff, StaffState } from '../../../_consts/native'
 import { createStaff$, deleteStaff$, staff$, updateStaff$ } from '../../../_state/store'
 import { Button } from '../../../_components/Button'
+import { useEscapeKey } from '../../../_utils/useEscapeKey'
 
 const stateOptions = [
 	{ value: StaffState.Available, label: 'Disponível' },
@@ -10,8 +11,8 @@ const stateOptions = [
 ]
 
 type StaffPanelProps = {
-	internalId: string | undefined;
-	onClose: () => void;
+	internalId: string | undefined
+	onClose: () => void
 }
 
 export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onClose }) => {
@@ -32,9 +33,6 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 		setStaffState(e.target.value as StaffState)
 	}
 
-	const [staffImage, setStaffImage] = useState('')
-	// Const onStaffImageChange = (e: React.ChangeEvent<HTMLInputElement>) => setStaffImage(e.target.value)
-
 	const canSave = staffName.trim() && staffId.trim()
 
 	useEffect(() => {
@@ -45,7 +43,6 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 
 		setStaffId(staff.label)
 		setStaffState(staff.state)
-		setStaffImage(staff.image)
 		setStaffName(staff.name)
 	}, [internalId, staffMap])
 
@@ -55,7 +52,7 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 			label: staffId,
 			name: staffName,
 			state: staffState,
-			image: staffImage
+			image: ''
 		} satisfies Staff
 
 		const tg$ = internalId ? updateStaff$ : createStaff$
@@ -65,13 +62,15 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 	}
 
 	const onDelete = () => {
-		if (internalId === null) {
+		if (!internalId) {
 			return
 		}
 
 		deleteStaff$.next(internalId)
 		onClose()
 	}
+
+	useEscapeKey(onClose)
 
 	return <div className='absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full z-10 select-none'>
 		<div className='absolute top-0 left-0 w-full h-full backdrop-blur-md' />

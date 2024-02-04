@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { Button } from '../../_components/Button'
 import { CardGrid } from '../../_components/CardGrid'
 import { StaffCard } from '../../_components/StaffCard'
-import { TableHeader } from '../_components/TableHeader'
+import { Header } from '../../_components/Header'
 import { staff$ } from '../../_state/store'
 import { Modal } from '../../_components/Modal'
 import { Scrollable } from '../../_components/Scrollable'
@@ -18,12 +18,12 @@ export const ManageStaff = () => {
 		return entries
 	}, [staffMap])
 
-	const [selectedId, setSelectedId] = useState<string | undefined>(null)
+	const [selectedId, setSelectedId] = useState<string | undefined>(undefined)
 	const [showForm, setShowForm] = useState(false)
 	const closeForm = setShowForm.bind(null, false)
 
 	const onCreate = () => {
-		setSelectedId(null)
+		setSelectedId(undefined)
 		setShowForm(true)
 	}
 
@@ -34,9 +34,10 @@ export const ManageStaff = () => {
 
 	return (
 		<div className='bg-body-background text-body-text flex flex-1 flex-col overflow-hidden select-none'>
-			<TableHeader>
+			<Header>
+				<div />
 				<Button onClick={onCreate}>Novo bombeiro</Button>
-			</TableHeader>
+			</Header>
 
 			<Scrollable className='pb-10'>
 				<CardGrid>

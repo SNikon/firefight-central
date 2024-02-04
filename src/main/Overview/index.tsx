@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { Button } from '../../_components/Button'
 import { CardGrid } from '../../_components/CardGrid'
 import { VehicleCard } from '../../_components/VehicleCard'
-import { TableHeader } from '../_components/TableHeader'
+import { Header } from '../../_components/Header'
 import { Scrollable } from '../../_components/Scrollable'
 import { ActiveOccurrenceCard } from '../../_components/ActiveOccurrenceCard'
 import { activeOccurrences$, staff$, vehicles$ } from '../../_state/store'
@@ -15,7 +15,8 @@ import { OccurrencePanel } from '../_components/OccurrencePanel'
 import { StaffState, VehicleState } from '../../_consts/native'
 import { StaffPanel } from '../_components/StaffPanel'
 import { VehiclePanel } from '../_components/VehiclePanel'
-import { CreateActiveOccurrence } from './CreateActiveOccurrence'
+import { ActiveOccurrenceWizard } from '../_components/ActiveOccurrenceWizard'
+import { openFullViewPanel } from '../../_utils/openFullViewPanel'
 
 export const Overview = () => {
 	const activeOccurrenceMap = useObservable(activeOccurrences$, {})
@@ -93,13 +94,14 @@ export const Overview = () => {
 	}
 
 	return (
-		<div className='bg-body-background text-body-text flex flex-col overflow-hidden'>
-			<TableHeader>
+		<div className='bg-background text-primary flex flex-col overflow-hidden'>
+			<Header>
+				<Button onClick={openFullViewPanel}>Painel de recursos</Button>
 				<Button onClick={setShowCreateOccurrence.bind(null, true)}>Nova Ocorrência</Button>
-			</TableHeader>
+			</Header>
 
 			<Scrollable className='pb-10'>
-				<div className='w-full px-5 pt-5 h-max gap-5 grid sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3'>
+				<div className='w-full px-5 pt-5 h-max gap-5 grid sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5'>
 					{sortedOccurrences.map(occurrence => (
 						<ActiveOccurrenceCard
 							key={occurrence.internalId}
@@ -148,7 +150,7 @@ export const Overview = () => {
 				</CardGrid>
 			</Scrollable>
 
-			{showCreateOccurrence && <Modal><CreateActiveOccurrence onClose={setShowCreateOccurrence.bind(null, false)} /></Modal>}
+			{showCreateOccurrence && <Modal><ActiveOccurrenceWizard onClose={setShowCreateOccurrence.bind(null, false)} /></Modal>}
 			{showViewOccurrence && <Modal><OccurrencePanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewOccurrence)} /></Modal>}
 			{showViewStaff && <Modal><StaffPanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewStaff)} /></Modal>}
 			{showViewVehicle && <Modal><VehiclePanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewVehicle)} /></Modal>}

@@ -22,7 +22,7 @@ const onInstall = () => {
 
 const useEventStatus = () => {
 	const [error, setError] = useState('')
-	const [status, setStatus] = useState<updater.UpdateStatus | undefined>(null)
+	const [status, setStatus] = useState<updater.UpdateStatus | undefined>(undefined)
 
 	useEffect(() => {
 		updater.onUpdaterEvent(event => {
