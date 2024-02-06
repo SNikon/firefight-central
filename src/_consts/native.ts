@@ -14,8 +14,8 @@ export type Occurrence = {
 
 export enum VehicleState {
 	Available = 'available',
-	Unavailable = 'unavailable',
-	Dispatched = 'dispatched'
+	Dispatched = 'dispatched',
+	Unavailable = 'unavailable'
 }
 
 export type Vehicle = {
@@ -27,8 +27,23 @@ export type Vehicle = {
 
 export enum StaffState {
 	Available = 'available',
+	Dispatched = 'dispatched',
+	Inactive = 'inactive',
+	SickLeave = 'sickLeave',
 	Unavailable = 'unavailable',
-	Dispatched = 'dispatched'
+}
+
+export enum StaffRank {
+	Unknown = 'unknown',
+	Rank0 = 'rank0',
+	Rank1 = 'rank1',
+	Rank2 = 'rank2',
+	Rank3 = 'rank3',
+	Rank4 = 'rank4',
+	Rank5 = 'rank5',
+	Rank6 = 'rank6',
+	Rank7 = 'rank7',
+	Rank8 = 'rank8'
 }
 
 export type Staff = {
@@ -36,5 +51,6 @@ export type Staff = {
 	image: string
 	label: string
 	name: string
+	rank: StaffRank
 	state: StaffState
 }

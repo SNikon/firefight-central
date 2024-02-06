@@ -7,11 +7,14 @@
   },
   "package": {
     "productName": "Firefight Central",
-    "version": "1.1.1"
+    "version": "1.3.0"
   },
   "tauri": {
     "allowlist": {
       "all": false,
+      "fs": {
+        "scope": ["$RESOURCE/*"]
+      },
       "shell": {
         "all": false,
         "open": true
@@ -30,6 +33,9 @@
         "icons/128x128@2x.png",
         "icons/icon.icns",
         "icons/icon.ico"
+      ],
+      "resources": [
+        "resources/**/*"
       ]
     },
     "security": {

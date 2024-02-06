@@ -10,11 +10,30 @@ pub struct Occurrence {
 
 #[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub enum StaffRank {
+	Rank0,
+	Rank1,
+	Rank2,
+	Rank3,
+	Rank4,
+	Rank5,
+	Rank6,
+	Rank7,
+	Rank8,
+	Unknown
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum StaffState {
 	Available,
-	Unavailable,
-	Dispatched
+	Dispatched,
+	Inactive,
+	SickLeave,
+	Unavailable
 }
+
+fn default_rank() -> StaffRank { StaffRank::Unknown }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -23,6 +42,8 @@ pub struct Staff {
 	pub image: String,
 	pub label: String,
 	pub name: String,
+	#[serde(default = "default_rank")]
+	pub rank: StaffRank,
 	pub state: StaffState
 }
 
@@ -30,8 +51,8 @@ pub struct Staff {
 #[serde(rename_all = "camelCase")]
 pub enum VehicleState {
 	Available,
-	Unavailable,
-	Dispatched
+	Dispatched,
+	Unavailable
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]

@@ -1,5 +1,14 @@
 use std::{io::Write, hash::Hasher};
 
+pub fn get_audio_resource(app_handle: &tauri::AppHandle, resource_name: &str) -> anyhow::Result<std::fs::File> {
+	let audio_resource_path = app_handle.path_resolver().resolve_resource(format!("resources/audio/{}.mp3", resource_name)).unwrap();
+	if !std::path::Path::exists(&audio_resource_path) {
+		return Err(anyhow::anyhow!("Audio resource not found"));
+	}
+
+	return Ok(std::fs::File::open(audio_resource_path)?);
+}
+
 fn get_audio_cache_dir(app_handle: &tauri::AppHandle) -> anyhow::Result<std::path::PathBuf> {
 	let audio_cache_path = app_handle.path_resolver().app_local_data_dir().unwrap().join("audio_cache");
 	if !std::path::Path::exists(&audio_cache_path) {

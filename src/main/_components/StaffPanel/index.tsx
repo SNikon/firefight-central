@@ -1,14 +1,31 @@
 import { type FunctionComponent, useEffect, useState } from 'react'
 import { useObservable } from 'react-use'
-import { type Staff, StaffState } from '../../../_consts/native'
+import { type Staff, StaffState, StaffRank } from '../../../_consts/native'
 import { createStaff$, deleteStaff$, staff$, updateStaff$ } from '../../../_state/store'
 import { Button } from '../../../_components/Button'
 import { useEscapeKey } from '../../../_utils/useEscapeKey'
+import { staffStateToLocale } from '../../../_utils/staffStateToLocale'
+import { staffRankToLocale } from '../../../_utils/staffRankToLocale'
 
 const stateOptions = [
-	{ value: StaffState.Available, label: 'Disponível' },
-	{ value: StaffState.Unavailable, label: 'Nao disponível' }
-]
+	StaffState.Available,
+	StaffState.Inactive,
+	StaffState.SickLeave,
+	StaffState.Unavailable
+].map(value => ({ value: value, label: staffStateToLocale(value) }))
+
+const rankOptions = [
+	StaffRank.Unknown,
+	StaffRank.Rank8,
+	StaffRank.Rank7,
+	StaffRank.Rank6,
+	StaffRank.Rank5,
+	StaffRank.Rank4,
+	StaffRank.Rank3,
+	StaffRank.Rank2,
+	StaffRank.Rank1,
+	StaffRank.Rank0
+].map(value => ({ value: value, label: staffRankToLocale(value) }))
 
 type StaffPanelProps = {
 	internalId: string | undefined
@@ -28,6 +45,11 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 		setStaffName(e.target.value)
 	}
 
+	const [staffRank, setStaffRank] = useState(StaffRank.Unknown)
+	const onStaffRankChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		setStaffRank(e.target.value as StaffRank)
+	}
+
 	const [staffState, setStaffState] = useState(StaffState.Available)
 	const onStaffStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		setStaffState(e.target.value as StaffState)
@@ -43,6 +65,7 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 
 		setStaffId(staff.label)
 		setStaffState(staff.state)
+		setStaffRank(staff.rank)
 		setStaffName(staff.name)
 	}, [internalId, staffMap])
 
@@ -51,6 +74,7 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 			internalId: internalId ?? '',
 			label: staffId,
 			name: staffName,
+			rank: staffRank,
 			state: staffState,
 			image: ''
 		} satisfies Staff
@@ -93,6 +117,16 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 				placeholder='Nome'
 				value={staffName}
 			/>
+
+			<select
+				className='bg-background text-action mt-5 p-2 rounded border border-[#000]/50'
+				onChange={onStaffRankChange}
+				value={staffRank}
+			>
+				{rankOptions.map(option => (
+					<option key={option.value} value={option.value}>{option.label}</option>
+				))}
+			</select>
 
 			<select
 				className='bg-background text-action mt-5 p-2 rounded border border-[#000]/50'

@@ -8,13 +8,13 @@ mod torii;
 use anyhow::Result;
 use polly::client::create_polly_client;
 use polly::synthesize::synthesize_text;
-use rodio::{Decoder, OutputStream};
+use rodio::{Decoder, OutputStream, Source};
 use tauri::{AppHandle, Manager};
 use torii::audio;
-use std::{io::BufReader, fs::File, sync::Mutex};
+use std::{fs::File, io::BufReader, sync::Mutex, time::Duration};
 
-static SLOW_PROSODY_START: &str = "<prosody rate=\"slow\" volume=\"x-loud\"><amazon:effect name=\"drc\">";
-static X_SLOW_PROSODY_START: &str = "<prosody rate=\"x-slow\" volume=\"x-loud\"><amazon:effect name=\"drc\">";
+static SLOW_PROSODY_START: &str = "<prosody rate=\"medium\" volume=\"x-loud\"><amazon:effect name=\"drc\">";
+static X_SLOW_PROSODY_START: &str = "<prosody rate=\"slow\" volume=\"x-loud\"><amazon:effect name=\"drc\">";
 static PROSODY_END: &str = "</amazon:effect></prosody>";
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -91,11 +91,25 @@ async fn alarm(
     // Get a output stream handle to the default physical sound device
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
     let sink = rodio::Sink::try_new(&stream_handle).unwrap();
+
+    let mut has_alert = false;
+    if let Ok(alert_file) = audio::get_audio_resource(&app_handle, "alert") {
+        let file: BufReader<File> = BufReader::new(alert_file);
+        let source = Decoder::new(file).unwrap();
+        sink.append(source);
+
+        has_alert = true;
+    }
+
     let file: BufReader<File> = BufReader::new(cache_audio_result.unwrap());
-    // Decode that sound file into a source
     let source = Decoder::new(file).unwrap();
-    // Play the sound directly on the device
-    sink.append(source);
+    
+    if has_alert {
+        sink.append(source.delay(Duration::from_millis(500)));
+    } else {
+        sink.append(source);
+    }
+    
     sink.sleep_until_end();
 
     Ok(())

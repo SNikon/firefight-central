@@ -4,11 +4,12 @@ import { type Vehicle, VehicleState } from '../../../_consts/native'
 import { createVehicle$, deleteVehicle$, updateVehicle$, vehicles$ } from '../../../_state/store'
 import { Button } from '../../../_components/Button'
 import { useEscapeKey } from '../../../_utils/useEscapeKey'
+import { vehicleStateToLocale } from '../../../_utils/vehicleStateToLocale'
 
 const stateOptions = [
-	{ value: VehicleState.Available, label: 'Disponível' },
-	{ value: VehicleState.Unavailable, label: 'Inoperacional' }
-]
+	VehicleState.Available,
+	VehicleState.Unavailable
+].map(value => ({ value: value, label: vehicleStateToLocale(value) }))
 
 type VehiclePanelProps = {
 	internalId: string | undefined

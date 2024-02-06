@@ -54,6 +54,7 @@ export const FullViewPanel = () => {
 						index={index}
 						label={staff.label}
 						internalId={staff.internalId}
+						rank={staff.rank}
 						state={staff.state}
 					/>
 				))}
