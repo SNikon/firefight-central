@@ -50,7 +50,7 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 		setStaffRank(e.target.value as StaffRank)
 	}
 
-	const [staffState, setStaffState] = useState(StaffState.Available)
+	const [staffState, setStaffState] = useState(StaffState.Unavailable)
 	const onStaffStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		setStaffState(e.target.value as StaffState)
 	}

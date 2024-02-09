@@ -11,7 +11,7 @@ export const staffStateToLocale = (state: StaffState): string => {
 	case StaffState.SickLeave:
 		return 'Baixa Médica'
 	case StaffState.Unavailable:
-		return 'Indisponível'
+		return 'Fora de Serviço'
 	default:
 		return ''
 	}
