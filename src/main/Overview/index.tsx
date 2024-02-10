@@ -105,6 +105,7 @@ export const Overview = () => {
 					{sortedOccurrences.map(occurrence => (
 						<ActiveOccurrenceCard
 							key={occurrence.internalId}
+							creationTime={occurrence.creationTime}
 							internalId={occurrence.internalId}
 							occurrenceId={occurrence.occurrenceId}
 							staffIds={occurrence.staffIds}

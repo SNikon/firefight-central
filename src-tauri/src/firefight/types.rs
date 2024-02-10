@@ -67,6 +67,7 @@ pub struct Vehicle {
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ActiveOccurrence {
+    pub creation_time: Option<u128>,
 	pub internal_id: String,
 	pub occurrence_id: String,
 	pub staff_ids: Vec<String>,

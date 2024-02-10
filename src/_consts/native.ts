@@ -1,5 +1,6 @@
 
 export type ActiveOccurrence = {
+	creationTime?: number
 	internalId: string
 	occurrenceId: string
 	vehicleIds: string[]

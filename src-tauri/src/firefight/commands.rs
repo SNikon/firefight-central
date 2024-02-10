@@ -1,6 +1,7 @@
 use std::borrow::BorrowMut;
 use std::ops::DerefMut;
 use std::sync::Mutex;
+use std::time;
 
 use tauri::{AppHandle, Manager, State};
 
@@ -23,12 +24,13 @@ pub fn get_store(
 pub fn create_active_occurrence(
     app_handle: AppHandle,
 	state: State<'_, Mutex<LocalStore>>,
-	active_occurrence: ActiveOccurrence
+	mut active_occurrence: ActiveOccurrence
 ) -> Result<(), String> {
 	let mut state_mutex = state.lock().unwrap();
 	let state_mutex_ref = state_mutex.borrow_mut();
 	let state = state_mutex_ref.deref_mut();
 
+	active_occurrence.creation_time = Some(time::UNIX_EPOCH.elapsed().unwrap().as_millis());
 	let create_result = state.create_active_occurrence(active_occurrence);
 	if let Err(create_error) = create_result { return Err(create_error.to_string()); }
 
