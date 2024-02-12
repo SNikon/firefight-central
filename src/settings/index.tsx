@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { updater } from '@tauri-apps/api'
+import { invoke, updater } from '@tauri-apps/api'
 import { relaunch } from '@tauri-apps/api/process'
 import { useResizeWindow } from '../_utils/useResizeWindow'
 import { Button } from '../_components/Button'
+
+const onClearCache = () => {
+	invoke('clear_audio_cache')
+		.catch(console.error)
+}
 
 const onCheck = () => {
 	updater.checkUpdate()
@@ -52,6 +57,8 @@ export const Settings = () => {
 			className='w-80 h-96 flex flex-col justify-start items-center gap-2 bg-background overflow-hidden p-4'
 			ref={containerRef}
 		>
+			<Button onClick={onClearCache}>Limpar cache de áudio</Button>
+
 			<Button onClick={hasUpdate ? onInstall : onCheck}>{hasUpdate
 				? 'Clique para actualizar'
 				: 'Verificar atualização' }

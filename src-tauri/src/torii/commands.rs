@@ -1,6 +1,14 @@
 use tauri::{AppHandle, LogicalPosition, Manager, WindowBuilder, WindowUrl};
 
 #[tauri::command(async)]
+pub fn clear_audio_cache(app_handle: AppHandle) -> Result<(), String> {
+	match crate::torii::audio::clear_cache(&app_handle) {
+		Ok(_) => Ok(()),
+		Err(err) => Err(err.to_string())
+	}
+}
+
+#[tauri::command(async)]
 pub fn open_fvp(app_handle: AppHandle) -> Result<(), String> {
 	// Already open?
 	if let Some(wnd) = app_handle.get_window("fvp") {

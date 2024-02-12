@@ -40,3 +40,10 @@ pub fn get_string_hash(string: &String) -> String {
 	hasher.write(string.as_bytes());
 	hasher.finish().to_string()
 }
+
+pub fn clear_cache(app_handle: &tauri::AppHandle) -> anyhow::Result<()> {
+	let audio_cache_path = get_audio_cache_dir(app_handle)?;
+	std::fs::remove_dir_all(&audio_cache_path)?;
+	std::fs::create_dir_all(&audio_cache_path)?;
+	Ok(())
+}

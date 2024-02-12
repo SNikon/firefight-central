@@ -70,7 +70,7 @@ async fn alarm(
 
         let vehicles_cue = sorted_vehicles.into_iter().map(|v| format!("{}<say-as interpret-as=\"spell-out\">{}</say-as>{}", X_SLOW_PROSODY_START, v, PROSODY_END)).collect::<Vec<String>>().join(", ");
         let staff_cue = if sorted_staff.len() > 0 { format!("<s>{}Guarnição <break strength=\"weak\" /> {}{}{}{}</s>", SLOW_PROSODY_START, PROSODY_END, X_SLOW_PROSODY_START, sorted_staff.join("<break strength=\"medium\" />"), PROSODY_END) } else { String::from("") };        
-        let audio_cue = format!("<speak><s>{}Saída de {}{}{} <break strength=\"weak\" /> para <break strength=\"weak\" /> {}{}</s> {}</speak>", SLOW_PROSODY_START, PROSODY_END, vehicles_cue, SLOW_PROSODY_START, occurrence, PROSODY_END, staff_cue);
+        let audio_cue = format!("<speak><s>{}Saída de {}{}{} <break strength=\"weak\" /> <phoneme alphabet=\"ipa\" ph=\"pɐ.ɾɐ\">para</phoneme> <break strength=\"weak\" /> {}{}</s> {}</speak>", SLOW_PROSODY_START, PROSODY_END, vehicles_cue, SLOW_PROSODY_START, occurrence, PROSODY_END, staff_cue);
         
         let synthesize_result = synthesize_text(&polly_client, &audio_cue).await;
         if synthesize_result.is_err() {
@@ -125,6 +125,18 @@ fn get_environment() -> String { String::from("production") }
 
 fn main() {
     tauri::Builder::default()
+        .on_window_event(|event| {
+            match event.event() {
+                tauri::WindowEvent::Destroyed => {
+                    let window = event.window();
+                    if window.label() == "main" {
+                        println!("Main window destroyed, exiting...");
+                        std::process::exit(0);
+                    }
+                }
+                _ => {}
+            }
+        })
         .setup(|app| {
             let store = firefight::local_store::create_store(app.app_handle());
             app.manage(Mutex::new(store));
@@ -147,6 +159,7 @@ fn main() {
             firefight::commands::delete_occurrence,
             firefight::commands::delete_staff,
             firefight::commands::delete_vehicle,
+            torii::commands::clear_audio_cache,
             torii::commands::open_fvp,
             torii::commands::open_settings
         ])
