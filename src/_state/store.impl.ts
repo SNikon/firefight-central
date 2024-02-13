@@ -51,6 +51,31 @@ export const bindUpdater$ = <T extends { internalId: string }>(
 		})
 }
 
+export const bindBulkUpdater$ = (
+	inUpdate$: Subject<string[]>,
+	outLoading$: Subject<boolean>,
+	remoteCall: string,
+	remoteField: string
+) => {
+	inUpdate$
+		.pipe(
+			delayWhen(() => outLoading$.pipe(filter(is => !is))),
+			tap(() => {
+				outLoading$.next(true)
+			}),
+			switchMap(updateData =>
+				from(invoke(remoteCall, { [remoteField]: updateData })).pipe(
+					take(1),
+					catchError(err => {
+						console.error(`Failed update call ${remoteCall}`, err)
+						outLoading$.next(false)
+						return of(null)
+					}))))
+		.subscribe(() => {
+			outLoading$.next(false)
+		})
+}
+
 export const bindDeleter$ = (
 	inDelete$: Subject<string>,
 	outLoading$: Subject<boolean>,

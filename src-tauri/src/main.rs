@@ -155,6 +155,7 @@ fn main() {
             firefight::commands::update_occurrence,
             firefight::commands::update_staff,
             firefight::commands::update_vehicle,
+            firefight::commands::set_staff_shift,
             firefight::commands::delete_active_occurrence,
             firefight::commands::delete_occurrence,
             firefight::commands::delete_staff,

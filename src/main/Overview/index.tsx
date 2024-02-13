@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { Button } from '../../_components/Button'
 import { CardGrid } from '../../_components/CardGrid'
 import { VehicleCard } from '../../_components/VehicleCard'
-import { Header } from '../../_components/Header'
+import { Header, HeaderSection } from '../../_components/Header'
 import { Scrollable } from '../../_components/Scrollable'
 import { ActiveOccurrenceCard } from '../../_components/ActiveOccurrenceCard'
 import { activeOccurrences$, staff$, vehicles$ } from '../../_state/store'
@@ -17,6 +17,7 @@ import { StaffPanel } from '../_components/StaffPanel'
 import { VehiclePanel } from '../_components/VehiclePanel'
 import { ActiveOccurrenceWizard } from '../_components/ActiveOccurrenceWizard'
 import { openFullViewPanel } from '../../_utils/openFullViewPanel'
+import { ShiftWizard } from '../_components/ShiftWizard'
 
 export const Overview = () => {
 	const activeOccurrenceMap = useObservable(activeOccurrences$, {})
@@ -43,6 +44,7 @@ export const Overview = () => {
 	const [selectedId, setSelectedId] = useState<string>('')
 
 	const [showCreateOccurrence, setShowCreateOccurrence] = useState(false)
+	const [showDefineShift, setShowDefineShift] = useState(false)
 	const [showViewOccurrence, setShowViewOccurrence] = useState(false)
 	const [showViewStaff, setShowViewStaff] = useState(false)
 	const [showViewVehicle, setShowViewVehicle] = useState(false)
@@ -96,8 +98,12 @@ export const Overview = () => {
 	return (
 		<div className='bg-background text-primary flex flex-col overflow-hidden'>
 			<Header>
-				<Button onClick={openFullViewPanel}>Painel de recursos</Button>
-				<Button onClick={setShowCreateOccurrence.bind(null, true)}>Nova Ocorrência</Button>
+				<HeaderSection>
+					<Button onClick={setShowDefineShift.bind(null, true)}>Definir turno</Button>
+					<Button onClick={openFullViewPanel}>Painel de recursos</Button>
+				</HeaderSection>
+
+				<Button onClick={setShowCreateOccurrence.bind(null, true)}>Nova ocorrência</Button>
 			</Header>
 
 			<Scrollable className='pb-10'>
@@ -152,6 +158,7 @@ export const Overview = () => {
 			</Scrollable>
 
 			{showCreateOccurrence && <Modal><ActiveOccurrenceWizard onClose={setShowCreateOccurrence.bind(null, false)} /></Modal>}
+			{showDefineShift && <Modal><ShiftWizard onClose={setShowDefineShift.bind(null, false)} /></Modal>}
 			{showViewOccurrence && <Modal><OccurrencePanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewOccurrence)} /></Modal>}
 			{showViewStaff && <Modal><StaffPanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewStaff)} /></Modal>}
 			{showViewVehicle && <Modal><VehiclePanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewVehicle)} /></Modal>}

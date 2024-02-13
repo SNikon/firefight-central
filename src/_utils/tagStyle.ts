@@ -1,19 +1,19 @@
 import classNames from 'classnames'
 import { StaffState, VehicleState } from '../_consts/native'
 
-const selectedClass = 'bg-primary text-primary'
-const availableClass = 'bg-available text-primary'
-const dispatchedClass = 'bg-dispatched text-primary'
-const unavailableClass = 'bg-unavailable text-primary'
+const availableTypes = [VehicleState.Available, StaffState.Available]
+const dispatchedTypes = [VehicleState.Dispatched, StaffState.Dispatched]
+const unavailableTypes = [VehicleState.Unavailable, StaffState.Unavailable, StaffState.Inactive, StaffState.SickLeave]
 
-export const getTagClassForStates = <T extends VehicleState | StaffState | void>(state: T, isSelected: boolean): string => {
-	if (isSelected) {
-		return selectedClass
-	}
-
-	return classNames({
-		[availableClass]: state === VehicleState.Available || state === StaffState.Available,
-		[dispatchedClass]: state === VehicleState.Dispatched || state === StaffState.Dispatched,
-		[unavailableClass]: state === VehicleState.Unavailable || state === StaffState.Unavailable
+export const getTagClassForStates = <T extends VehicleState | StaffState | void>(state: T, isSelected: boolean): string =>
+	classNames({
+		'bg-primary': isSelected,
+		'bg-available': !isSelected && state && availableTypes.includes(state),
+		'bg-dispatched': !isSelected && state && dispatchedTypes.includes(state),
+		'bg-unavailable': !isSelected && state && unavailableTypes.includes(state),
+		
+		'text-primary': !isSelected,
+		'text-available': isSelected && state && availableTypes.includes(state),
+		'text-dispatched': isSelected && state && dispatchedTypes.includes(state),
+		'text-unavailable': isSelected && state && unavailableTypes.includes(state)
 	})
-}

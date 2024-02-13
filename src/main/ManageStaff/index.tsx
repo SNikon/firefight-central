@@ -35,7 +35,7 @@ export const ManageStaff = () => {
 	return (
 		<div className='bg-body-background text-body-text flex flex-1 flex-col overflow-hidden select-none'>
 			<Header>
-				<Button onClick={() => {}}>Turno</Button>
+				<div />
 				<Button onClick={onCreate}>Novo bombeiro</Button>
 			</Header>
 

@@ -224,3 +224,20 @@ pub fn delete_vehicle(
 	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
 	Ok(())
 }
+
+#[tauri::command(async)]
+pub fn set_staff_shift(
+	app_handle: AppHandle,
+	state: State<'_, Mutex<LocalStore>>,
+	available_staff: Vec<String>
+) -> Result<(), String> {
+	let mut state_mutex = state.lock().unwrap();
+	let state_mutex_ref = state_mutex.borrow_mut();
+	let state = state_mutex_ref.deref_mut();
+
+	let update_result = state.set_staff_shift(available_staff);
+	if let Err(update_error) = update_result { return Err(update_error.to_string()); }
+
+	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
+	Ok(())
+}

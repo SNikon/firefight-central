@@ -405,4 +405,20 @@ impl FirefightDataManager for LocalStore {
 
 		Ok(())
     }
+
+    fn set_staff_shift(&mut self, available_staff: Vec<String>) -> anyhow::Result<()> {
+		let staff_value = self.get("staff").with_context(|| format!("Unable to read staff from store"))?.clone();
+		let mut staff_store = serde_json::from_value::<HashMap<String, Staff>>(staff_value).with_context(|| format!("Failed to deserialize staff"))?;
+
+		staff_store.iter_mut().for_each(|(_, staff)| {
+			if (staff.state == StaffState::Available) || (staff.state == StaffState::Unavailable) {
+				staff.state = if available_staff.contains(&staff.internal_id) { StaffState::Available } else { StaffState::Unavailable }
+			}
+		});
+
+		self.insert(String::from("staff"), serde_json::json!(staff_store)).with_context(|| format!("Failed to update staff with value {:?}", staff_store))?;
+		self.save().with_context(|| format!("Failed to save store while setting staff shift"))?;
+
+		Ok(())
+    }
 }

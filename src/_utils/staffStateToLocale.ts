@@ -22,13 +22,13 @@ export const staffStateToShortLocale = (state: StaffState): string => {
 	case StaffState.Available:
 		return 'Disp'
 	case StaffState.Dispatched:
-		return 'Serviço'
+		return 'Serv'
 	case StaffState.Inactive:
-		return 'Inativo'
+		return 'Inat'
 	case StaffState.SickLeave:
 		return 'Baixa'
 	case StaffState.Unavailable:
-		return 'F/Serviço'
+		return 'F/Serv'
 	default:
 		return ''
 	}

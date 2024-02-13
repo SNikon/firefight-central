@@ -9,6 +9,7 @@ type VehicleTagProps = {
 	index: number
 	internalId: string
 	label: string
+	onClick?: (internalId: string) => void
 	selected?: boolean
 	state: VehicleState
 }
@@ -18,12 +19,16 @@ export const VehicleTag: FunctionComponent<VehicleTagProps> = props => {
 		'rounded-r-3xl flex-1 px-2 py-1 truncate',
 		getTagClassForStates(props.state, props.selected || false))
 
-	const onFocus: FocusEventHandler<HTMLDivElement> = evt => {
+	const onLocalClick = () => {
+		props.onClick?.(props.internalId)
+	}
+
+	const onFocus: FocusEventHandler<HTMLElement> = evt => {
 		evt.target.scrollIntoView({ behavior: 'smooth', block: 'nearest'})
 	}
 
 	return (
-		<div className='w-full text-lg font-bold flex flex-row' onFocus={onFocus}>
+		<button className='w-full text-lg font-bold flex flex-row' onClick={onLocalClick} onFocus={onFocus}>
 			<label className='bg-button text-primary rounded-l-3xl w-24 px-2 py-1 truncate text-right'>
 				{defaultToNbSp(props.label)}
 			</label>
@@ -31,6 +36,6 @@ export const VehicleTag: FunctionComponent<VehicleTagProps> = props => {
 			<label className={stateClassName}>
 				{defaultToNbSp(vehicleStateToShortLocale(props.state))}
 			</label>
-		</div>
+		</button>
 	)
 }

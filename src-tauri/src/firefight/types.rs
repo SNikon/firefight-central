@@ -110,4 +110,6 @@ pub trait FirefightDataManager {
 	fn delete_occurrence(&mut self, occurrence_id: String) -> anyhow::Result<()>;
 	fn delete_staff(&mut self, staff_id: String) -> anyhow::Result<()>;
 	fn delete_vehicle(&mut self, vehicle_id: String) -> anyhow::Result<()>;
+
+	fn set_staff_shift(&mut self, available_staff: Vec<String>) -> anyhow::Result<()>;
 }

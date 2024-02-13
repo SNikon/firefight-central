@@ -6,15 +6,16 @@ import { Header, HeaderSection } from '../../../_components/Header'
 import { Button } from '../../../_components/Button'
 import { activeOccurrences$, createActiveOccurrence$, occurrences$, staff$, updateActiveOccurrence$, vehicles$ } from '../../../_state/store'
 import { OccurrenceCard } from '../../../_components/OccurrenceCard'
-import { VehicleCard } from '../../../_components/VehicleCard'
 import { vehicleSortByOcurrenceState } from '../../../_utils/vehicleSort'
 import { occurrenceSortByLabel } from '../../../_utils/occurrenceSort'
 import { staffSortByOccurrenceState } from '../../../_utils/staffSort'
-import { StaffCard } from '../../../_components/StaffCard'
 import { FullscreenOverlay } from '../../../_components/FullScreenOverlay'
 import { ActiveOccurrence, Staff, StaffState, Vehicle, VehicleState } from '../../../_consts/native'
 import { useEscapeKey } from '../../../_utils/useEscapeKey'
 import { sendAlert } from '../../../_utils/sendAlert'
+import { VehicleTag } from '../../../_components/VehicleTag'
+import { TagGrid } from '../../../_components/TagGrid'
+import { StaffTag } from '../../../_components/StaffTag'
 
 type SectionProps<T> = {
 	initialValue: T
@@ -60,7 +61,7 @@ type PickVehiclesProps = {
 } & SectionProps<string[]>
 const PickVehicles: FunctionComponent<PickVehiclesProps> = ({ initialValue, onCancel, onPrevious, onNext, vehicles }) => {
 	const sortedVehicles = useMemo(() => {
-		const entries = Object.values(vehicles)
+		const entries = Object.values(vehicles).filter(vehicle => vehicle.state === VehicleState.Available)
 		entries.sort(vehicleSortByOcurrenceState)
 		return entries
 	}, [vehicles])
@@ -94,19 +95,19 @@ const PickVehicles: FunctionComponent<PickVehiclesProps> = ({ initialValue, onCa
 			</Header>
 
 			<Scrollable>
-				<CardGrid>
-					{sortedVehicles.map(vehicle => (
-						<VehicleCard
+				<TagGrid>
+					{sortedVehicles.map((vehicle, index) => (
+						<VehicleTag
 							key={vehicle.internalId}
-							image={vehicle.image}
-							internalId={vehicle.internalId}
+							index={index}
 							label={vehicle.label}
+							internalId={vehicle.internalId}
 							onClick={onSelect}
 							selected={selected.includes(vehicle.internalId)}
 							state={vehicle.state}
 						/>
 					))}
-				</CardGrid>
+				</TagGrid>
 			</Scrollable>
 		</div>
 	)
@@ -117,7 +118,7 @@ type PickStaffProps = {
 } & SectionProps<string[]>
 const PickStaff: FunctionComponent<PickStaffProps> = ({ initialValue, onCancel, onPrevious, onNext, staff }) => {
 	const sortedStaff = useMemo(() => {
-		const entries = Object.values(staff)
+		const entries = Object.values(staff).filter(staff => staff.state === StaffState.Available)
 		entries.sort(staffSortByOccurrenceState)
 		return entries
 	}, [staff])
@@ -152,20 +153,20 @@ const PickStaff: FunctionComponent<PickStaffProps> = ({ initialValue, onCancel, 
 			</Header>
 
 			<Scrollable>
-				<CardGrid>
-					{sortedStaff.map(staff => (
-						<StaffCard
+				<TagGrid>
+					{sortedStaff.map((staff, index) => (
+						<StaffTag
 							key={staff.internalId}
-							image={staff.image}
-							internalId={staff.internalId}
+							index={index}
 							label={staff.label}
-							name={staff.name}
+							internalId={staff.internalId}
 							onClick={onSelect}
+							rank={staff.rank}
 							selected={selected.includes(staff.internalId)}
 							state={staff.state}
 						/>
 					))}
-				</CardGrid>
+				</TagGrid>
 			</Scrollable>
 		</div>
 	)

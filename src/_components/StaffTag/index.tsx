@@ -7,6 +7,7 @@ import { staffStateToShortLocale } from '../../_utils/staffStateToLocale'
 import { staffRankToInsignia } from '../../_utils/staffRankToInsignia'
 
 type StaffTagProps = {
+	disabled?: boolean
 	index: number
 	internalId: string
 	label: string
@@ -28,7 +29,11 @@ export const StaffTag: FunctionComponent<StaffTagProps> = props => {
 	}
 
 	return (
-		<div className='w-full text-lg font-bold flex flex-row' onClick={onLocalClick} onFocus={onFocus}>
+		<div
+			className='w-full text-lg font-bold flex flex-row'
+			onClick={props.disabled ? undefined : onLocalClick}
+			onFocus={onFocus}
+		>
 			<div className='bg-button rounded-l-3xl w-24 h-9 px-2 py-1 flex flex-row justify-between'>
 				{props.rank && <img className='h-full object-cover mx-2' src={staffRankToInsignia(props.rank)} />}
 

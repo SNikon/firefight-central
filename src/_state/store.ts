@@ -2,7 +2,7 @@ import { invoke } from '@tauri-apps/api/tauri'
 import { BehaviorSubject, ReplaySubject, Subject, distinctUntilChanged, map } from 'rxjs'
 import { listen } from '@tauri-apps/api/event'
 import { type ActiveOccurrence, type Occurrence, type Staff, type Vehicle } from '../_consts/native'
-import { bindCreator$, bindDeleter$, bindUpdater$ } from './store.impl'
+import { bindBulkUpdater$, bindCreator$, bindDeleter$, bindUpdater$ } from './store.impl'
 
 export type State = {
 	activeOccurrences: Record<string, ActiveOccurrence>
@@ -49,6 +49,9 @@ export const updateVehicle$ = new Subject<Vehicle>()
 bindUpdater$(updateVehicle$, updatingState$, 'update_vehicle', 'vehicle')
 export const updateStaff$ = new Subject<Staff>()
 bindUpdater$(updateStaff$, updatingState$, 'update_staff', 'staff')
+
+export const updateShift$ = new Subject<string[]>()
+bindBulkUpdater$(updateShift$, updatingState$, 'set_staff_shift', 'availableStaff')
 
 export const deleteActiveOccurrence$ = new Subject<string>()
 bindDeleter$(deleteActiveOccurrence$, updatingState$, 'delete_active_occurrence', 'activeOccurrenceId')

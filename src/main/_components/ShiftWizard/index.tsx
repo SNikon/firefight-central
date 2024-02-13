@@ -1,14 +1,15 @@
-import { type FunctionComponent, useMemo, useState } from 'react'
+import { type FunctionComponent, useMemo, useState, useEffect } from 'react'
 import { useObservable } from 'react-use'
 import { Scrollable } from '../../../_components/Scrollable'
 import { Header, HeaderSection } from '../../../_components/Header'
 import { Button } from '../../../_components/Button'
-import {  staff$ } from '../../../_state/store'
-import { staffSortByOccurrenceState } from '../../../_utils/staffSort'
+import { staff$, updateShift$ } from '../../../_state/store'
+import { staffSortByLabel } from '../../../_utils/staffSort'
 import { FullscreenOverlay } from '../../../_components/FullScreenOverlay'
 import { useEscapeKey } from '../../../_utils/useEscapeKey'
 import { TagGrid } from '../../../_components/TagGrid'
 import { StaffTag } from '../../../_components/StaffTag'
+import { StaffState } from '../../../_consts/native'
 
 type ShiftWizardProps = {
 	onClose: () => void
@@ -19,11 +20,19 @@ export const ShiftWizard: FunctionComponent<ShiftWizardProps> = ({ onClose }) =>
 	
 	const sortedStaff = useMemo(() => {
 		const entries = Object.values(staff)
-		entries.sort(staffSortByOccurrenceState)
+		entries.sort(staffSortByLabel)
 		return entries
 	}, [staff])
 
+	// Start with 'Dispatched' default selected as they are currently on duty
 	const [selected, setSelected] = useState<string[]>([])
+
+	const staffReady = sortedStaff.length > 0
+	useEffect(() => {
+		setSelected(sortedStaff
+			.filter(staff => staff.state === StaffState.Dispatched)
+			.map(staff => staff.internalId))
+	}, [staffReady])
 	
 	const onSelect = (vehicleId: string) => {
 		setSelected(prevSelected => {
@@ -36,6 +45,11 @@ export const ShiftWizard: FunctionComponent<ShiftWizardProps> = ({ onClose }) =>
 
 			return [...prevSelected, vehicleId]
 		})
+	}
+
+	const onConfirm = () => {
+		updateShift$.next(selected)
+		onClose()
 	}
 
 	useEscapeKey(onClose)
@@ -52,6 +66,7 @@ export const ShiftWizard: FunctionComponent<ShiftWizardProps> = ({ onClose }) =>
 						</HeaderSection>
 						
 						<HeaderSection>
+							<Button onClick={onConfirm}>Confirmar</Button>
 						</HeaderSection>
 					</Header>
 
@@ -60,6 +75,7 @@ export const ShiftWizard: FunctionComponent<ShiftWizardProps> = ({ onClose }) =>
 							{sortedStaff.map((staff, index) => (
 								<StaffTag
 									key={staff.internalId}
+									disabled={staff.state === StaffState.Dispatched}
 									index={index}
 									internalId={staff.internalId}
 									label={staff.label}
