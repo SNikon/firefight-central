@@ -59,6 +59,7 @@ pub enum VehicleState {
 #[serde(rename_all = "camelCase")]
 pub struct Vehicle {
 	pub internal_id: String,
+	pub capacity: Option<u8>,
 	pub image: String,
 	pub label: String,
 	pub state: VehicleState
@@ -71,7 +72,9 @@ pub struct ActiveOccurrence {
 	pub internal_id: String,
 	pub occurrence_id: String,
 	pub staff_ids: Vec<String>,
-	pub vehicle_ids: Vec<String>,
+	#[serde(default)]
+	pub vehicle_assignment_map: HashMap<String, Vec<String>>,
+	pub vehicle_ids: Vec<String>
 }
 
 #[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]

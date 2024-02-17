@@ -104,22 +104,25 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 				{internalId ? 'Gerir' : 'Adicionar'} bombeiro
 			</div>
 
+			<label className='mt-5 text-action'>Identificador</label>
 			<input
-				className='bg-background text-action  mt-5 p-2 rounded border border-[#000]/50'
+				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
 				onChange={onStaffIdChange}
 				placeholder='Identificador'
 				value={staffId}
 			/>
 
+			<label className='mt-5 text-action'>Nome</label>
 			<input
-				className='bg-background text-action  mt-5 p-2 rounded border border-[#000]/50'
+				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
 				onChange={onStaffNameChange}
 				placeholder='Nome'
 				value={staffName}
 			/>
 
+			<label className='mt-5 text-action'>Posto</label>
 			<select
-				className='bg-background text-action mt-5 p-2 rounded border border-[#000]/50'
+				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
 				onChange={onStaffRankChange}
 				value={staffRank}
 			>
@@ -128,8 +131,9 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 				))}
 			</select>
 
+			<label className='mt-5 text-action'>Estado</label>
 			<select
-				className='bg-background text-action mt-5 p-2 rounded border border-[#000]/50'
+				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
 				disabled={staffState === StaffState.Dispatched}
 				onChange={onStaffStateChange}
 				value={staffState}

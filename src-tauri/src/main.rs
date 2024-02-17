@@ -129,6 +129,7 @@ fn main() {
             match event.event() {
                 tauri::WindowEvent::Destroyed => {
                     let window = event.window();
+
                     if window.label() == "main" {
                         println!("Main window destroyed, exiting...");
                         std::process::exit(0);
@@ -162,7 +163,8 @@ fn main() {
             firefight::commands::delete_vehicle,
             torii::commands::clear_audio_cache,
             torii::commands::open_fvp,
-            torii::commands::open_settings
+            torii::commands::open_settings,
+            torii::commands::set_fullscreen
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -129,6 +129,7 @@ export const Overview = () => {
 					{sortedVehicles.map(vehicle => (
 						<VehicleCard
 							key={vehicle.internalId}
+							disabled={vehicle.state !== VehicleState.Dispatched}
 							label={vehicle.label}
 							image={vehicle.image}
 							internalId={vehicle.internalId}
@@ -146,6 +147,7 @@ export const Overview = () => {
 					{sortedStaff.map(staff => (
 						<StaffCard
 							key={staff.internalId}
+							disabled={staff.state !== StaffState.Dispatched}
 							label={staff.label}
 							image={staff.image}
 							internalId={staff.internalId}

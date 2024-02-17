@@ -3,6 +3,7 @@ export type ActiveOccurrence = {
 	creationTime?: number
 	internalId: string
 	occurrenceId: string
+	vehicleAssignmentMap: Record<string, string[]>
 	vehicleIds: string[]
 	staffIds: string[]
 }
@@ -21,6 +22,7 @@ export enum VehicleState {
 
 export type Vehicle = {
 	internalId: string
+	capacity?: number
 	image: string
 	label: string
 	state: VehicleState

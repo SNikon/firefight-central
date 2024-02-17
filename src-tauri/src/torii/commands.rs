@@ -1,4 +1,4 @@
-use tauri::{AppHandle, LogicalPosition, Manager, WindowBuilder, WindowUrl};
+use tauri::{AppHandle, LogicalPosition, Manager, Window, WindowBuilder, WindowUrl};
 
 #[tauri::command(async)]
 pub fn clear_audio_cache(app_handle: AppHandle) -> Result<(), String> {
@@ -62,6 +62,15 @@ pub fn open_settings(app_handle: AppHandle, left: f64, top: f64) -> Result<(), S
 		.resizable(false)
 		.transparent(false)
 		.build() {
+		return Err(err.to_string());
+	}
+
+	Ok(())
+}
+
+#[tauri::command(async)]
+pub fn set_fullscreen(window: Window, fullscreen: bool) -> Result<(), String> {
+	if let Err(err) = window.set_fullscreen(fullscreen) {
 		return Err(err.to_string());
 	}
 

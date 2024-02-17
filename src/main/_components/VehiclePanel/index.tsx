@@ -24,6 +24,11 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 		setVehicleId(e.target.value)
 	}
 
+	const [vehicleCapacity, setVehicleCapacity] = useState('')
+	const onVehicleCapacityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setVehicleCapacity(e.target.value)
+	}
+
 	const [vehicleState, setVehicleState] = useState(VehicleState.Available)
 	const onVehicleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		setVehicleState(e.target.value as VehicleState)
@@ -38,12 +43,16 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 		}
 
 		setVehicleId(vehicle.label)
+		setVehicleCapacity(vehicle.capacity?.toString() ?? '')
 		setVehicleState(vehicle.state)
 	}, [internalId, vehicleMap])
 
 	const onSave = () => {
+		const parsedCapacity = vehicleCapacity.trim() === '' ? undefined : Number.parseInt(vehicleCapacity, 10)
+
 		const vehicle = {
 			internalId: internalId ?? '',
+			capacity: parsedCapacity,
 			label: vehicleId,
 			state: vehicleState,
 			image: ''
@@ -74,15 +83,25 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 				{internalId ? 'Gerir' : 'Adicionar'} veículo
 			</div>
 
+			<label className='mt-5 text-action'>Identificador</label>
 			<input
-				className='bg-background text-action  mt-5 p-2 rounded border border-[#000]/50'
+				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
 				onChange={onVehicleIdChange}
 				placeholder='Identificador'
 				value={vehicleId}
 			/>
 
+			<label className='mt-5 text-action'>Capacidade</label>
+			<input
+				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
+				onChange={onVehicleCapacityChange}
+				placeholder='Ocupação máxima'
+				value={vehicleCapacity}
+			/>
+
+			<label className='mt-5 text-action'>Estado</label>
 			<select
-				className='bg-background text-action mt-5 p-2 rounded border border-[#000]/50'
+				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
 				disabled={vehicleState === VehicleState.Dispatched}
 				onChange={onVehicleStateChange}
 				value={vehicleState}
