@@ -4,7 +4,7 @@ import { Header, HeaderSection } from '../../../../_components/Header'
 import { Button } from '../../../../_components/Button'
 import { occurrences$ } from '../../../../_state/store'
 import { ActiveOccurrence, Staff, StaffState, Vehicle, VehicleState } from '../../../../_consts/native'
-import { sendAlert } from '../../../../_utils/sendAlert'
+import { sendOccurrenceAlert } from '../../../../_utils/sendAlert'
 
 type ConfirmOccurrenceProps = {
 	activeOccurrence?: ActiveOccurrence
@@ -13,10 +13,11 @@ type ConfirmOccurrenceProps = {
 	onCancel: () => void
 	onNext: () => void
 	onPrevious: () => void
-	vehicleIds: string[]
-	vehicles: Record<string, Vehicle>
 	staff: Record<string, Staff>
 	staffIds: string[]
+	vehicleAssignmentMap: Record<string, string[]>
+	vehicleIds: string[]
+	vehicles: Record<string, Vehicle>
 }
 
 export const ConfirmOccurrence: FunctionComponent<ConfirmOccurrenceProps> = ({
@@ -28,6 +29,7 @@ export const ConfirmOccurrence: FunctionComponent<ConfirmOccurrenceProps> = ({
 	onPrevious,
 	staff,
 	staffIds,
+	vehicleAssignmentMap,
 	vehicleIds,
 	vehicles,
 }) => {
@@ -35,10 +37,7 @@ export const ConfirmOccurrence: FunctionComponent<ConfirmOccurrenceProps> = ({
 	const occurrence = occurrences[occurrenceId]?.name
 
 	const onSendAlert = () => {
-		const vehicleSet = vehicleIds.map(id => vehicles[id]?.label)
-		const staffSet = staffIds.map(id => staff[id]?.label)
-	
-		sendAlert(occurrence, staffSet, vehicleSet)
+		sendOccurrenceAlert(occurrenceId, vehicleAssignmentMap)
 		onNext()
 	}
 	// If there is a vehicle or staff that is not available and not in the active occurrence, add a warning

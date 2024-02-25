@@ -170,6 +170,7 @@ export const ActiveOccurrenceWizard: FunctionComponent<ActiveOccurrenceWizardPro
 					onPrevious={onConfirmPrev}
 					staff={staffMap}
 					staffIds={staffIds}
+					vehicleAssignmentMap={vehicleAssignmentMap}
 					vehicleIds={vehicleIds}
 					vehicles={vehicleMap}
 				/>}

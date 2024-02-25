@@ -6,7 +6,7 @@ pub fn get_audio_resource(app_handle: &tauri::AppHandle, resource_name: &str) ->
 		return Err(anyhow::anyhow!("Audio resource not found"));
 	}
 
-	return Ok(std::fs::File::open(audio_resource_path)?);
+	Ok(std::fs::File::open(audio_resource_path)?)
 }
 
 fn get_audio_cache_dir(app_handle: &tauri::AppHandle) -> anyhow::Result<std::path::PathBuf> {
@@ -18,16 +18,16 @@ fn get_audio_cache_dir(app_handle: &tauri::AppHandle) -> anyhow::Result<std::pat
 }
 
 pub fn get_audio_from_cache(app_handle: &tauri::AppHandle, resource_name: &String) -> anyhow::Result<std::fs::File> {
-	let audio_resource_path = get_audio_cache_dir(app_handle).unwrap().join(format!("{}.mp3", resource_name));
+	let audio_resource_path = get_audio_cache_dir(app_handle).unwrap().join(format!("{}.ogg", resource_name));
 	if !std::path::Path::exists(&audio_resource_path) {
 		return Err(anyhow::anyhow!("Audio resource not found in cache"));
 	}
 
-	return Ok(std::fs::File::open(audio_resource_path)?);
+	Ok(std::fs::File::open(audio_resource_path)?)
 }
 
-pub fn cache_audio(app_handle: &tauri::AppHandle, resource_name: &String, bytes: &mut Vec<u8>) -> anyhow::Result<()> {
-	let audio_resource_path = get_audio_cache_dir(app_handle).unwrap().join(format!("{}.mp3", resource_name));
+pub fn cache_audio(app_handle: &tauri::AppHandle, resource_name: &String, bytes: &[u8]) -> anyhow::Result<()> {
+	let audio_resource_path = get_audio_cache_dir(app_handle).unwrap().join(format!("{}.ogg", resource_name));
 	
 	let mut file = std::fs::File::create(audio_resource_path).unwrap();
 	file.write_all(bytes).unwrap();

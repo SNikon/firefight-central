@@ -13,7 +13,7 @@ import { ActiveOccurrenceWizard } from '../ActiveOccurrenceWizard'
 import { Header, HeaderSection } from '../../../_components/Header'
 import { useEscapeKey } from '../../../_utils/useEscapeKey'
 import { useAlertSelection } from '../../../_utils/useAlertSelection'
-import { sendAlert } from '../../../_utils/sendAlert'
+import { sendCustomAlert } from '../../../_utils/sendAlert'
 
 type OccurrencePanelProps = {
 	internalId: string
@@ -61,12 +61,8 @@ export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ inter
 	} = useAlertSelection(activeOccurrence.staffIds, activeOccurrence.vehicleIds)
 
 	const onSendAlert = () => {
-		if (selectedStaff.length || selectedVehicles.length) {
-			const occurrenceName = occurrence.name			
-			const vehicleLabels = selectedVehicles.map(id => vehicleMap[id]?.label)
-			const staffLabels = selectedStaff.map(id => staffMap[id]?.label)
-		
-			sendAlert(occurrenceName, staffLabels, vehicleLabels)
+		if (selectedStaff.length && selectedVehicles.length) {
+			sendCustomAlert(activeOccurrence.occurrenceId, selectedStaff, selectedVehicles)
 		}
 		
 		onEndSelection()
