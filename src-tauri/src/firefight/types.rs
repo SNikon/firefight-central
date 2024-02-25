@@ -123,15 +123,15 @@ pub trait FirefightDataManager {
 	fn create_staff(&mut self, staff: Staff) -> anyhow::Result<String>;
 	fn create_vehicle(&mut self, vehicle: Vehicle) -> anyhow::Result<String>;
 	
-	fn update_active_occurrence(&mut self, active_occurrence_id: String, active_occurrence: ActiveOccurrence) -> anyhow::Result<Option<ActiveOccurrence>>;
-	fn update_occurrence(&mut self, occurrence_id: String, occurrence: Occurrence) -> anyhow::Result<Option<Occurrence>>;
-	fn update_staff(&mut self, staff_id: String, staff: Staff) -> anyhow::Result<Option<Staff>>;
-	fn update_vehicle(&mut self, vehicle_id: String, vehicle: Vehicle) -> anyhow::Result<Option<Vehicle>>;
+	fn update_active_occurrence(&mut self, active_occurrence_id: &String, active_occurrence: ActiveOccurrence) -> anyhow::Result<Option<ActiveOccurrence>>;
+	fn update_occurrence(&mut self, occurrence_id: &String, occurrence: Occurrence) -> anyhow::Result<Option<Occurrence>>;
+	fn update_staff(&mut self, staff_id: &String, staff: Staff) -> anyhow::Result<Option<Staff>>;
+	fn update_vehicle(&mut self, vehicle_id: &String, vehicle: Vehicle) -> anyhow::Result<Option<Vehicle>>;
 
-	fn delete_active_occurrence(&mut self, active_occurrence_id: String) -> anyhow::Result<()>;
-	fn delete_occurrence(&mut self, occurrence_id: String) -> anyhow::Result<()>;
-	fn delete_staff(&mut self, staff_id: String) -> anyhow::Result<()>;
-	fn delete_vehicle(&mut self, vehicle_id: String) -> anyhow::Result<()>;
+	fn delete_active_occurrence(&mut self, active_occurrence_id: &String) -> anyhow::Result<()>;
+	fn delete_occurrence(&mut self, occurrence_id: &String) -> anyhow::Result<()>;
+	fn delete_staff(&mut self, staff_id: &String) -> anyhow::Result<()>;
+	fn delete_vehicle(&mut self, vehicle_id: &String) -> anyhow::Result<()>;
 
 	fn set_staff_shift(&mut self, available_staff: Vec<String>) -> anyhow::Result<()>;
 }

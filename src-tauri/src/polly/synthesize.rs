@@ -20,7 +20,7 @@ impl Synthesizable {
             Synthesizable::Pattern(label) => format!("{}{}{}", SLOW_SPEECH, label, SPEECH_END),
             Synthesizable::Vehicle(label) => format!("{}<say-as interpret-as=\"spell-out\">{}</say-as>{}", X_SLOW_SPEECH, label, SPEECH_END),
             Synthesizable::Raw(text) => text.clone(),
-            Synthesizable::Staff(label) => format!("{}{}{}", SLOW_SPEECH, label, SPEECH_END),
+            Synthesizable::Staff(label) => format!("{}{}{}", SLOW_SPEECH, label.trim_start_matches('0'), SPEECH_END),
         }
     }
 }

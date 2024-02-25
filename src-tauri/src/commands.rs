@@ -9,9 +9,11 @@ use futures::future::try_join_all;
 use rodio::{Decoder, OutputStream, Source};
 use tauri::{async_runtime::Mutex, AppHandle, LogicalPosition, Manager, State, Window, WindowBuilder, WindowUrl};
 
+use crate::firefight::{audio, events::*, local_store::*, types::*};
 use crate::polly;
-use crate::firefight::{events::STATE_UPDATED, local_store::*, types::*};
-use crate::torii;
+
+const VEHICLE_SPEECH: &str = "Veículo";
+const STAFF_SPEECH: &str = "Guarnição";
 
 #[tauri::command]
 pub async fn get_store(
@@ -61,7 +63,7 @@ pub async fn create_occurrence(
 	let audio_synthesizer = polly::client::create_polly_client().await;
 	let audio_resouce = polly::synthesize::synthesize(&audio_synthesizer, &polly::synthesize::Synthesizable::Occurrence(audible_occurrence_label)).await;
 	if audio_resouce.is_err() { return Err(audio_resouce.unwrap_err().to_string()); }
-	let _  = torii::audio::cache_audio(&app_handle, &occurrence_id.unwrap(), audio_resouce.unwrap().to_vec().borrow_mut());
+	let _  = audio::put_audio_cache(&app_handle, &occurrence_id.unwrap(), audio_resouce.unwrap().to_vec().borrow_mut());
 
 	Ok(())
 }
@@ -85,7 +87,7 @@ pub async fn create_staff(
 	let audio_synthesizer = polly::client::create_polly_client().await;
 	let audio_resouce = polly::synthesize::synthesize(&audio_synthesizer, &polly::synthesize::Synthesizable::Staff(audible_staff_label)).await;
 	if audio_resouce.is_err() { return Err(audio_resouce.unwrap_err().to_string()); }
-	let _  = torii::audio::cache_audio(&app_handle, &staff_id.unwrap(), audio_resouce.unwrap().to_vec().borrow_mut());
+	let _  = audio::put_audio_cache(&app_handle, &staff_id.unwrap(), audio_resouce.unwrap().to_vec().borrow_mut());
 	
 	Ok(())
 }
@@ -109,7 +111,7 @@ pub async fn create_vehicle(
 	let audio_synthesizer = polly::client::create_polly_client().await;
 	let audio_resouce = polly::synthesize::synthesize(&audio_synthesizer, &polly::synthesize::Synthesizable::Vehicle(audible_vehicle_label)).await;
 	if audio_resouce.is_err() { return Err(audio_resouce.unwrap_err().to_string()); }
-	let _  = torii::audio::cache_audio(&app_handle, &vehicle_id.unwrap(), audio_resouce.unwrap().to_vec().borrow_mut());
+	let _  = audio::put_audio_cache(&app_handle, &vehicle_id.unwrap(), audio_resouce.unwrap().to_vec().borrow_mut());
 
 	Ok(())
 }
@@ -124,7 +126,7 @@ pub async fn update_active_occurrence(
 	let state_mutex_ref = state_mutex.borrow_mut();
 	let state = state_mutex_ref.deref_mut();
 
-	let update_result = state.update_active_occurrence(active_occurrence.internal_id.clone(), active_occurrence);
+	let update_result = state.update_active_occurrence(&active_occurrence.internal_id.clone(), active_occurrence);
 	if let Err(update_error) = update_result { return Err(update_error.to_string()); }
 
 	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
@@ -142,7 +144,7 @@ pub async fn update_occurrence(
 	let state = state_mutex_ref.deref_mut();
 
 	let audible_occurrence_label = occurrence.name.clone();
-	let update_result = state.update_occurrence(occurrence.internal_id.clone(), occurrence);
+	let update_result = state.update_occurrence(&occurrence.internal_id.clone(), occurrence);
 	if let Err(update_error) = update_result { return Err(update_error.to_string()); }
 
 	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
@@ -152,7 +154,7 @@ pub async fn update_occurrence(
 			let audio_synthesizer = polly::client::create_polly_client().await;
 			let audio_resouce = polly::synthesize::synthesize(&audio_synthesizer, &polly::synthesize::Synthesizable::Occurrence(audible_occurrence_label)).await;
 			if audio_resouce.is_err() { return Err(audio_resouce.unwrap_err().to_string()); }
-			let _  = torii::audio::cache_audio(&app_handle, &previous_occurrence.internal_id, audio_resouce.unwrap().to_vec().borrow_mut());
+			let _  = audio::put_audio_cache(&app_handle, &previous_occurrence.internal_id, audio_resouce.unwrap().to_vec().borrow_mut());
 		}
 	}
 
@@ -170,7 +172,7 @@ pub async fn update_staff(
 	let state = state_mutex_ref.deref_mut();
 
 	let audible_staff_label = staff.label.clone();
-	let update_result = state.update_staff(staff.internal_id.clone(), staff);
+	let update_result = state.update_staff(&staff.internal_id.clone(), staff);
 	if let Err(update_error) = update_result { return Err(update_error.to_string()); }
 
 	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
@@ -180,7 +182,7 @@ pub async fn update_staff(
 			let audio_synthesizer = polly::client::create_polly_client().await;
 			let audio_resouce = polly::synthesize::synthesize(&audio_synthesizer, &polly::synthesize::Synthesizable::Staff(audible_staff_label)).await;
 			if audio_resouce.is_err() { return Err(audio_resouce.unwrap_err().to_string()); }
-			let _  = torii::audio::cache_audio(&app_handle, &previous_staff.internal_id, audio_resouce.unwrap().to_vec().borrow_mut());
+			let _  = audio::put_audio_cache(&app_handle, &previous_staff.internal_id, audio_resouce.unwrap().to_vec().borrow_mut());
 		}
 	}
 
@@ -198,7 +200,7 @@ pub async fn update_vehicle(
 	let state = state_mutex_ref.deref_mut();
 
 	let audible_vehicle_label = vehicle.label.clone();
-	let update_result = state.update_vehicle(vehicle.internal_id.clone(), vehicle);
+	let update_result = state.update_vehicle(&vehicle.internal_id.clone(), vehicle);
 	if let Err(update_error) = update_result { return Err(update_error.to_string()); }
 
 	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
@@ -208,7 +210,7 @@ pub async fn update_vehicle(
 			let audio_synthesizer = polly::client::create_polly_client().await;
 			let audio_resouce = polly::synthesize::synthesize(&audio_synthesizer, &polly::synthesize::Synthesizable::Vehicle(audible_vehicle_label)).await;
 			if audio_resouce.is_err() { return Err(audio_resouce.unwrap_err().to_string()); }
-			let _  = torii::audio::cache_audio(&app_handle, &previous_vehicle.internal_id, audio_resouce.unwrap().to_vec().borrow_mut());
+			let _  = audio::put_audio_cache(&app_handle, &previous_vehicle.internal_id, audio_resouce.unwrap().to_vec().borrow_mut());
 		}
 	}
 
@@ -225,7 +227,7 @@ pub async fn delete_active_occurrence(
 	let state_mutex_ref = state_mutex.borrow_mut();
 	let state = state_mutex_ref.deref_mut();
 
-	let delete_result = state.delete_active_occurrence(active_occurrence_id);
+	let delete_result = state.delete_active_occurrence(&active_occurrence_id);
 	if let Err(delete_error) = delete_result { return Err(delete_error.to_string()); }
 
 	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
@@ -242,10 +244,12 @@ pub async fn delete_occurrence(
 	let state_mutex_ref = state_mutex.borrow_mut();
 	let state = state_mutex_ref.deref_mut();
 
-	let delete_result = state.delete_occurrence(occurrence_id);
+	let delete_result = state.delete_occurrence(&occurrence_id);
 	if let Err(delete_error) = delete_result { return Err(delete_error.to_string()); }
 
 	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
+	let _ = audio::delete_audio_cache(&app_handle, &occurrence_id);
+
 	Ok(())
 }
 
@@ -259,10 +263,12 @@ pub async fn delete_staff(
 	let state_mutex_ref = state_mutex.borrow_mut();
 	let state = state_mutex_ref.deref_mut();
 
-	let delete_result = state.delete_staff(staff_id);
+	let delete_result = state.delete_staff(&staff_id);
 	if let Err(delete_error) = delete_result { return Err(delete_error.to_string()); }
 
 	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
+	let _ = audio::delete_audio_cache(&app_handle, &staff_id);
+
 	Ok(())
 }
 
@@ -276,10 +282,12 @@ pub async fn delete_vehicle(
 	let state_mutex_ref = state_mutex.borrow_mut();
 	let state = state_mutex_ref.deref_mut();
 
-	let delete_result = state.delete_vehicle(vehicle_id);
+	let delete_result = state.delete_vehicle(&vehicle_id);
 	if let Err(delete_error) = delete_result { return Err(delete_error.to_string()); }
 
 	let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
+	let _ = audio::delete_audio_cache(&app_handle, &vehicle_id);
+
 	Ok(())
 }
 
@@ -302,10 +310,88 @@ pub async fn set_staff_shift(
 
 #[tauri::command(async)]
 pub fn clear_audio_cache(app_handle: AppHandle) -> Result<(), String> {
-	match crate::torii::audio::clear_cache(&app_handle) {
+	match audio::clear_audio_cache(&app_handle) {
 		Ok(_) => Ok(()),
 		Err(err) => Err(err.to_string())
 	}
+}
+
+#[tauri::command]
+pub async fn rebuild_audio_cache(
+	app_handle: AppHandle,
+	state: State<'_, Mutex<LocalStore>>,
+) -> Result<(), String> {
+	let mut state_mutex = state.lock().into_future().await;
+	let state_mutex_ref = state_mutex.borrow_mut();
+	let state = state_mutex_ref.deref_mut();
+
+	if let Err(clear_error) = audio::clear_audio_cache(&app_handle) { return Err(clear_error.to_string()) }
+
+	let audio_synthesizer = polly::client::create_polly_client().await;
+	let audio_synthesizer_ref = &audio_synthesizer;
+	let app_handle_ref = &app_handle;
+
+	let vs_str = VEHICLE_SPEECH.to_string();
+	let vs_hash_value = audio::get_string_hash(&vs_str);
+	if let Ok(vs_resource) = polly::synthesize::synthesize(audio_synthesizer_ref, &polly::synthesize::Synthesizable::Pattern(vs_str)).await {
+		let _ = audio::put_audio_cache(app_handle_ref, &vs_hash_value, vs_resource.to_vec().borrow_mut());
+	}
+
+	let ss_str = STAFF_SPEECH.to_string();
+	let ss_hash_value = audio::get_string_hash(&ss_str);
+	if let Ok(ss_resource) = polly::synthesize::synthesize(audio_synthesizer_ref, &polly::synthesize::Synthesizable::Pattern(ss_str)).await {
+		let _ = audio::put_audio_cache(app_handle_ref, &ss_hash_value, ss_resource.to_vec().borrow_mut());
+	}
+	
+	let occurrence_list = state.get_occurrence_list();
+	if occurrence_list.is_ok() {
+		let _occurrence_cache: Result<Vec<()>, ()> = try_join_all(
+			occurrence_list
+				.unwrap()
+				.into_iter()
+				.map(|occurrence| async move {
+					let audio_resouce = polly::synthesize::synthesize(audio_synthesizer_ref, &polly::synthesize::Synthesizable::Occurrence(occurrence.name)).await;
+					if let Ok(audio_data) = audio_resouce {
+						let _ = audio::put_audio_cache(app_handle_ref, &occurrence.internal_id, audio_data.to_vec().borrow_mut());
+					}
+					
+					Ok(())
+				})).await;
+	}
+
+	let vehicle_list = state.get_vehicle_list();
+	if vehicle_list.is_ok() {
+		let _vehicle_cache: Result<Vec<()>, ()> = try_join_all(
+			vehicle_list
+				.unwrap()
+				.into_iter()
+				.map(|vehicle| async move {
+					let audio_resouce = polly::synthesize::synthesize(audio_synthesizer_ref, &polly::synthesize::Synthesizable::Vehicle(vehicle.label)).await;
+					if let Ok(audio_data) = audio_resouce {
+						let _ = audio::put_audio_cache(app_handle_ref, &vehicle.internal_id, audio_data.to_vec().borrow_mut());
+					}
+					
+					Ok(())
+				})).await;
+	}
+
+	let staff_list = state.get_staff_list();
+	if staff_list.is_ok() {
+		let _staff_cache: Result<Vec<()>, ()> = try_join_all(
+			staff_list
+				.unwrap()
+				.into_iter()
+				.map(|staff| async move {
+					let audio_resouce = polly::synthesize::synthesize(audio_synthesizer_ref, &polly::synthesize::Synthesizable::Staff(staff.label)).await;
+					if let Ok(audio_data) = audio_resouce {
+						let _ = audio::put_audio_cache(app_handle_ref, &staff.internal_id, audio_data.to_vec().borrow_mut());
+					}
+					
+					Ok(())
+				})).await;
+	}
+
+	Ok(())
 }
 
 #[tauri::command(async)]
@@ -426,11 +512,11 @@ pub async fn alarm(
     audio_key_comp.append(&mut staff_key_comp);
     audio_key_comp.append(&mut occurrence_key_comp);
 
-    let audio_key = torii::audio::get_string_hash(&audio_key_comp.join("-"));
+    let audio_key = audio::get_string_hash(&audio_key_comp.join("-"));
 
-    let mut cache_audio_result = torii::audio::get_audio_from_cache(&app_handle, &audio_key);
+    let mut put_audio_cache_result = audio::get_audio_cache(&app_handle, &audio_key);
 
-    if cache_audio_result.is_err() {
+    if put_audio_cache_result.is_err() {
         println!("Audio not found in cache, synthesizing...");
 
         let polly_client = polly::client::create_polly_client().await;
@@ -454,12 +540,12 @@ pub async fn alarm(
         }
 
         let mut audio_data = synthesize_result.unwrap().to_vec();
-        if let Err(cache_error) = torii::audio::cache_audio(&app_handle, &audio_key, &mut audio_data) {
+        if let Err(cache_error) = audio::put_audio_cache(&app_handle, &audio_key, &mut audio_data) {
             return Err(format!("Failed to cache audio, err: {}", cache_error));
         }
 
         // Re-fetch from cache
-        cache_audio_result = torii::audio::get_audio_from_cache(&app_handle, &audio_key);
+        put_audio_cache_result = audio::get_audio_cache(&app_handle, &audio_key);
     } else {
         println!("Audio found in cache, playing...");
     }
@@ -469,7 +555,7 @@ pub async fn alarm(
     let sink = rodio::Sink::try_new(&stream_handle).unwrap();
 
     let mut has_alert = false;
-    if let Ok(alert_file) = torii::audio::get_audio_resource(&app_handle, "alert") {
+    if let Ok(alert_file) = audio::get_audio_resource(&app_handle, "alert") {
         let file: BufReader<File> = BufReader::new(alert_file);
         let source = Decoder::new(file).unwrap();
         sink.append(source);
@@ -477,7 +563,7 @@ pub async fn alarm(
         has_alert = true;
     }
 
-    let file: BufReader<File> = BufReader::new(cache_audio_result.unwrap());
+    let file: BufReader<File> = BufReader::new(put_audio_cache_result.unwrap());
     let source = Decoder::new(file).unwrap();
     
     if has_alert {
@@ -492,20 +578,17 @@ pub async fn alarm(
 }
 
 async fn synthesize_pattern(app_handle: &AppHandle, syntherizer: &aws_sdk_polly::Client, str_value: &String) -> anyhow::Result<File> {
-	let hash_value = torii::audio::get_string_hash(str_value);
-	let mut audio_data = torii::audio::get_audio_from_cache(app_handle, &hash_value);
+	let hash_value = audio::get_string_hash(str_value);
+	let mut audio_data = audio::get_audio_cache(app_handle, &hash_value);
 
 	if audio_data.is_err() {
 		let audio_resource = polly::synthesize::synthesize(syntherizer, &polly::synthesize::Synthesizable::Pattern(str_value.clone())).await?;
-		let _ = torii::audio::cache_audio(app_handle, &hash_value, audio_resource.to_vec().borrow_mut());
-		audio_data = torii::audio::get_audio_from_cache(app_handle, &hash_value);
+		let _ = audio::put_audio_cache(app_handle, &hash_value, audio_resource.to_vec().borrow_mut());
+		audio_data = audio::get_audio_cache(app_handle, &hash_value);
 	}
 
 	audio_data
 }
-
-const VEHICLE_SPEECH: &str = "Veículo";
-const STAFF_SPEECH: &str = "Guarnição";
 
 #[tauri::command]
 pub async fn alert(
@@ -558,15 +641,15 @@ pub async fn alert(
 		vehicle_sets
 			.into_iter()
 			.map(|(vehicle_id, staff_ids)| async move {
-				let mut vehicle_audio_data = torii::audio::get_audio_from_cache(app_handle_ref, &vehicle_id);
+				let mut vehicle_audio_data = audio::get_audio_cache(app_handle_ref, &vehicle_id);
 				// Try to synthesize and cache
 				if vehicle_audio_data.is_err() {
 					let mut vehicle_label = state_ref.get_vehicle_label(&vehicle_id)?.clone();
 					vehicle_label.retain(|c| !c.is_whitespace());
 
 					let audio_resouce = polly::synthesize::synthesize(audio_synthesizer_ref, &polly::synthesize::Synthesizable::Vehicle(vehicle_label)).await?;
-					let _  = torii::audio::cache_audio(app_handle_ref, &vehicle_id, &audio_resouce.to_vec());
-					vehicle_audio_data = torii::audio::get_audio_from_cache(app_handle_ref, &vehicle_id)
+					let _  = audio::put_audio_cache(app_handle_ref, &vehicle_id, &audio_resouce.to_vec());
+					vehicle_audio_data = audio::get_audio_cache(app_handle_ref, &vehicle_id)
 				}
 
 				// Still failed? Give up
@@ -576,14 +659,14 @@ pub async fn alert(
 					staff_ids
 						.into_iter()
 						.map(|staff_id| async move {
-							let mut staff_audio_data = torii::audio::get_audio_from_cache(app_handle_ref, &staff_id);
+							let mut staff_audio_data = audio::get_audio_cache(app_handle_ref, &staff_id);
 							// Try to synthesize and cache
 							if staff_audio_data.is_err() {
-								let staff_label = state_ref.get_staff_label(&staff_id)?.trim_start_matches('0').to_string();
+								let staff_label = state_ref.get_staff_label(&staff_id)?;
 				
 								let audio_resouce = polly::synthesize::synthesize(audio_synthesizer_ref, &polly::synthesize::Synthesizable::Staff(staff_label)).await?;
-								let _  = torii::audio::cache_audio(app_handle_ref, &staff_id, &audio_resouce.to_vec());
-								staff_audio_data = torii::audio::get_audio_from_cache(app_handle_ref, &staff_id)
+								let _  = audio::put_audio_cache(app_handle_ref, &staff_id, &audio_resouce.to_vec());
+								staff_audio_data = audio::get_audio_cache(app_handle_ref, &staff_id)
 							}
 
 							staff_audio_data
@@ -601,7 +684,7 @@ pub async fn alert(
 	let audio_cues = audio_cues.unwrap();
 	    
     // Prepare occurrence audio
-    let mut occurrence_cue = torii::audio::get_audio_from_cache(&app_handle, &occurrence_id);
+    let mut occurrence_cue = audio::get_audio_cache(&app_handle, &occurrence_id);
     if occurrence_cue.is_err() {
         let occurrence_label = state.get_occurrence_name(&occurrence_id);
         if occurrence_label.is_err() { return Err(occurrence_label.unwrap_err().to_string()) }
@@ -611,14 +694,14 @@ pub async fn alert(
         if audio_resource.is_err() { return Err(audio_resource.unwrap_err().to_string()) }
         let audio_resource = audio_resource.unwrap();
 
-        let _  = torii::audio::cache_audio(&app_handle, &occurrence_id, &audio_resource.to_vec());
-        occurrence_cue = torii::audio::get_audio_from_cache(&app_handle, &occurrence_id)
+        let _  = audio::put_audio_cache(&app_handle, &occurrence_id, &audio_resource.to_vec());
+        occurrence_cue = audio::get_audio_cache(&app_handle, &occurrence_id)
     }
     if occurrence_cue.is_err() { return Err(occurrence_cue.unwrap_err().to_string()) }
 	let occurrence_cue = occurrence_cue.unwrap();
     
     // Prepare linking audio
-    let alert_cue = torii::audio::get_audio_resource(&app_handle, "alert");
+    let alert_cue = audio::get_audio_resource(&app_handle, "alert");
     if alert_cue.is_err() { return Err(alert_cue.unwrap_err().to_string()) }
     let alert_cue = alert_cue.unwrap();
 
@@ -641,12 +724,12 @@ pub async fn alert(
 	audio_cues
 		.into_iter()
 		.for_each(|(vehicle_cue, staff_cues)| {
-			let vehicle_start = torii::audio::get_audio_from_cache(&app_handle, &torii::audio::get_string_hash(&String::from(VEHICLE_SPEECH))).unwrap();
+			let vehicle_start = audio::get_audio_cache(&app_handle, &audio::get_string_hash(&String::from(VEHICLE_SPEECH))).unwrap();
 			sink.append(Decoder::new(BufReader::new(vehicle_start)).unwrap());
 			sink.append(Decoder::new(BufReader::new(vehicle_cue)).unwrap());
 
 			if !staff_cues.is_empty() {
-				let staff_start = torii::audio::get_audio_from_cache(&app_handle, &torii::audio::get_string_hash(&String::from(STAFF_SPEECH))).unwrap();
+				let staff_start = audio::get_audio_cache(&app_handle, &audio::get_string_hash(&String::from(STAFF_SPEECH))).unwrap();
 				sink.append(Decoder::new(BufReader::new(staff_start)).unwrap());
 				
 				staff_cues

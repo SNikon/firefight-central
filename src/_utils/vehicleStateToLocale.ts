@@ -7,7 +7,7 @@ export const vehicleStateToLocale = (state: VehicleState): string => {
 	case VehicleState.Dispatched:
 		return 'Em Serviço'
 	case VehicleState.Unavailable:
-		return 'Inoperacional'
+		return 'Inop'
 	default:
 		return ''
 	}

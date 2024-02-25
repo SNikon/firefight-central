@@ -4,7 +4,6 @@
 mod commands;
 mod firefight;
 mod polly;
-mod torii;
 
 use tauri::{async_runtime::Mutex, Manager};
 
@@ -51,6 +50,7 @@ fn main() {
             commands::delete_staff,
             commands::delete_vehicle,
             commands::clear_audio_cache,
+            commands::rebuild_audio_cache,
             commands::open_fvp,
             commands::open_settings,
             commands::set_fullscreen

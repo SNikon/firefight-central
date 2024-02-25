@@ -246,12 +246,12 @@ impl FirefightDataManager for LocalStore {
 		Ok(vehicle_id)
 	}
 
-    fn update_active_occurrence(&mut self, active_occurrence_id: String, active_occurrence: ActiveOccurrence) -> anyhow::Result<Option<ActiveOccurrence>> {
+    fn update_active_occurrence(&mut self, active_occurrence_id: &String, active_occurrence: ActiveOccurrence) -> anyhow::Result<Option<ActiveOccurrence>> {
 		let active_occurrences_value = self.get("active_occurrences").with_context(|| "Unable to read active occurrences from store".to_string())?.clone();
 		let mut active_occurrence_store = serde_json::from_value::<HashMap<String, ActiveOccurrence>>(active_occurrences_value).with_context(|| "Failed to deserialize active occurrences".to_string())?;
 		
 		let previous_active_occurrence = active_occurrence_store.insert(active_occurrence_id.clone(), active_occurrence.clone()).unwrap();
-		self.insert(String::from("active_occurrences"), serde_json::json!(active_occurrence_store)).with_context(|| format!("Failed to update active occurrence {} with value {:?}", active_occurrence_id, active_occurrence_store.get(&active_occurrence_id).unwrap()))?;
+		self.insert(String::from("active_occurrences"), serde_json::json!(active_occurrence_store)).with_context(|| format!("Failed to update active occurrence {} with value {:?}", active_occurrence_id, active_occurrence_store.get(active_occurrence_id).unwrap()))?;
 
 		let removed_vehicles = previous_active_occurrence.vehicle_ids.iter().filter(|vehicle_id| !active_occurrence.vehicle_ids.contains(vehicle_id)).collect::<Vec<&String>>();
 		let removed_staff = previous_active_occurrence.staff_ids.iter().filter(|staff_id| !active_occurrence.staff_ids.contains(staff_id)).collect::<Vec<&String>>();
@@ -292,47 +292,47 @@ impl FirefightDataManager for LocalStore {
 		Ok(Some(previous_active_occurrence))
     }
 
-    fn update_occurrence(&mut self, occurrence_id: String, occurrence: Occurrence) -> anyhow::Result<Option<Occurrence>> {
+    fn update_occurrence(&mut self, occurrence_id: &String, occurrence: Occurrence) -> anyhow::Result<Option<Occurrence>> {
 		let occurrence_value = self.get("occurrences").with_context(|| "Unable to read occurrences from store".to_string())?.clone();
 		let mut occurrence_store = serde_json::from_value::<HashMap<String, Occurrence>>(occurrence_value).with_context(|| "Failed to deserialize occurrences".to_string())?;
 
 		let prev_ocurrence = occurrence_store.insert(occurrence_id.clone(), occurrence);
 
-		self.insert(String::from("occurrences"), serde_json::json!(occurrence_store)).with_context(|| format!("Failed to update occurrence {} with value {:?}", &occurrence_id, occurrence_store.get(&occurrence_id).unwrap()))?;
+		self.insert(String::from("occurrences"), serde_json::json!(occurrence_store)).with_context(|| format!("Failed to update occurrence {} with value {:?}", occurrence_id, occurrence_store.get(occurrence_id).unwrap()))?;
 		self.save().with_context(|| "Failed to save store while updating occurrence".to_string())?;
 
 		Ok(prev_ocurrence)
     }
 
-    fn update_staff(&mut self, staff_id: String, staff: Staff) -> anyhow::Result<Option<Staff>> {
+    fn update_staff(&mut self, staff_id: &String, staff: Staff) -> anyhow::Result<Option<Staff>> {
 		let staff_value = self.get("staff").with_context(|| "Unable to read staff from store".to_string())?.clone();
 		let mut staff_store = serde_json::from_value::<HashMap<String, Staff>>(staff_value).with_context(|| "Failed to deserialize staff".to_string())?;
 
 		let prev_staff = staff_store.insert(staff_id.clone(), staff);
 
-		self.insert(String::from("staff"), serde_json::json!(staff_store)).with_context(|| format!("Failed to update staff {} with value {:?}", &staff_id, staff_store.get(&staff_id).unwrap()))?;
+		self.insert(String::from("staff"), serde_json::json!(staff_store)).with_context(|| format!("Failed to update staff {} with value {:?}", staff_id, staff_store.get(staff_id).unwrap()))?;
 		self.save().with_context(|| "Failed to save store while updating staff".to_string())?;
 
 		Ok(prev_staff)
     }
 
-    fn update_vehicle(&mut self, vehicle_id: String, vehicle: Vehicle) -> anyhow::Result<Option<Vehicle>> {
+    fn update_vehicle(&mut self, vehicle_id: &String, vehicle: Vehicle) -> anyhow::Result<Option<Vehicle>> {
 		let vehicles_value = self.get("vehicles").with_context(|| "Unable to read vehicles from store".to_string())?.clone();
 		let mut vehicle_store = serde_json::from_value::<HashMap<String, Vehicle>>(vehicles_value).with_context(|| "Failed to deserialize vehicles".to_string())?;
 
 		let previous_vehicle = vehicle_store.insert(vehicle_id.clone(), vehicle);
 
-		self.insert(String::from("vehicles"), serde_json::json!(vehicle_store)).with_context(|| format!("Failed to update vehicle {} with value {:?}", &vehicle_id, vehicle_store.get(&vehicle_id)))?;
+		self.insert(String::from("vehicles"), serde_json::json!(vehicle_store)).with_context(|| format!("Failed to update vehicle {} with value {:?}", vehicle_id, vehicle_store.get(vehicle_id)))?;
 		self.save().with_context(|| "Failed to save store while updating vehicle".to_string())?;
 
 		Ok(previous_vehicle)
     }
 
-    fn delete_active_occurrence(&mut self, active_occurrence_id: String) -> anyhow::Result<()> {
+    fn delete_active_occurrence(&mut self, active_occurrence_id: &String) -> anyhow::Result<()> {
 		let active_occurrence_value = self.get("active_occurrences").with_context(|| "Unable to read active occurrences from store".to_string())?.clone();
 		let mut active_occurrence_store = serde_json::from_value::<HashMap<String, ActiveOccurrence>>(active_occurrence_value).with_context(|| "Failed to deserialize active occurrences".to_string())?;
 
-		if let Some(active_ocurrence) = active_occurrence_store.remove(&active_occurrence_id) {
+		if let Some(active_ocurrence) = active_occurrence_store.remove(active_occurrence_id) {
 			self.insert(String::from("active_occurrences"), serde_json::json!(active_occurrence_store)).with_context(|| format!("Failed to delete active occurrence {}", active_occurrence_id))?;
 
 			// Update vehicles
@@ -365,11 +365,11 @@ impl FirefightDataManager for LocalStore {
 		Ok(())
     }
 
-    fn delete_occurrence(&mut self, occurrence_id: String) -> anyhow::Result<()> {
+    fn delete_occurrence(&mut self, occurrence_id: &String) -> anyhow::Result<()> {
 		let occurrence_value = self.get("occurrences").with_context(|| "Unable to read occurrences from store".to_string())?.clone();
 		let mut occurrence_store = serde_json::from_value::<HashMap<String, Occurrence>>(occurrence_value).with_context(|| "Failed to deserialize occurrences".to_string())?;
 
-		occurrence_store.remove(&occurrence_id);
+		occurrence_store.remove(occurrence_id);
 
 		self.insert(String::from("occurrences"), serde_json::json!(occurrence_store)).with_context(|| format!("Failed to delete occurrence {}", occurrence_id))?;
 		self.save().with_context(|| "Failed to save store while deleting occurrence".to_string())?;
@@ -377,11 +377,11 @@ impl FirefightDataManager for LocalStore {
 		Ok(())
 	}
 
-    fn delete_staff(&mut self, staff_id: String) -> anyhow::Result<()> {
+    fn delete_staff(&mut self, staff_id: &String) -> anyhow::Result<()> {
 		let staff_value = self.get("staff").with_context(|| "Unable to read staff from store".to_string())?.clone();
 		let mut staff_store = serde_json::from_value::<HashMap<String, Staff>>(staff_value).with_context(|| "Failed to deserialize staff".to_string())?;
 
-		let removed_entry = staff_store.remove(&staff_id);
+		let removed_entry = staff_store.remove(staff_id);
 		self.insert(String::from("staff"), serde_json::json!(staff_store)).with_context(|| format!("Failed to delete staff {}", staff_id))?;
 		
 		if let Some(remove_staff) = removed_entry {
@@ -391,10 +391,10 @@ impl FirefightDataManager for LocalStore {
 				let mut active_occurrence_store = serde_json::from_value::<HashMap<String, ActiveOccurrence>>(active_occurrence_value).with_context(|| "Failed to deserialize active occurrences".to_string())?;
 
 				if let Some(active_occurrence) = active_occurrence_store.values_mut().find(|active_occurrence| active_occurrence.staff_ids.contains(&staff_id)) {
-					let staff_idx = active_occurrence.staff_ids.iter().position(|id| id == &staff_id);
+					let staff_idx = active_occurrence.staff_ids.iter().position(|id| id == staff_id);
 					active_occurrence.staff_ids.swap_remove(staff_idx.unwrap());
 					active_occurrence.vehicle_assignment_map.iter_mut().for_each(|(_, vehicle_staff_ids)| {
-						let vehicle_staff_idx = vehicle_staff_ids.iter().position(|id| id == &staff_id);
+						let vehicle_staff_idx = vehicle_staff_ids.iter().position(|id| id == staff_id);
 						if let Some(vehicle_staff_idx) = vehicle_staff_idx {
 							vehicle_staff_ids.swap_remove(vehicle_staff_idx);
 						}
@@ -410,11 +410,11 @@ impl FirefightDataManager for LocalStore {
 		Ok(())
     }
 
-    fn delete_vehicle(&mut self, vehicle_id: String) -> anyhow::Result<()> {
+    fn delete_vehicle(&mut self, vehicle_id: &String) -> anyhow::Result<()> {
 		let vehicles_value = self.get("vehicles").with_context(|| "Unable to read vehicles from store".to_string())?.clone();
 		let mut vehicle_store = serde_json::from_value::<HashMap<String, Vehicle>>(vehicles_value).with_context(|| "Failed to deserialize vehicles".to_string())?;
 
-		let removed_entry = vehicle_store.remove(&vehicle_id);
+		let removed_entry = vehicle_store.remove(vehicle_id);
 		self.insert(String::from("vehicles"), serde_json::json!(vehicle_store)).with_context(|| format!("Failed to delete vehicle {}", vehicle_id))?;
 		
 		if let Some(removed_vehicle) = removed_entry {
@@ -424,9 +424,9 @@ impl FirefightDataManager for LocalStore {
 				let mut active_occurrence_store = serde_json::from_value::<HashMap<String, ActiveOccurrence>>(active_occurrence_value).with_context(|| "Failed to deserialize active occurrences".to_string())?;
 
 				if let Some(active_occurrence) = active_occurrence_store.values_mut().find(|active_occurrence| active_occurrence.vehicle_ids.contains(&vehicle_id)) {
-					let vehicle_idx = active_occurrence.vehicle_ids.iter().position(|id| id == &vehicle_id);
+					let vehicle_idx = active_occurrence.vehicle_ids.iter().position(|id| id == vehicle_id);
 					active_occurrence.vehicle_ids.swap_remove(vehicle_idx.unwrap());
-					active_occurrence.vehicle_assignment_map.remove(&vehicle_id);
+					active_occurrence.vehicle_assignment_map.remove(vehicle_id);
 				}
 				
 				self.insert(String::from("active_occurrences"), serde_json::json!(active_occurrence_store)).with_context(|| format!("Failed to update active occurrences with value {:?}", active_occurrence_store))?;

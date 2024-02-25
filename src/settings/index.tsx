@@ -4,8 +4,8 @@ import { relaunch } from '@tauri-apps/api/process'
 import { useResizeWindow } from '../_utils/useResizeWindow'
 import { Button } from '../_components/Button'
 
-const onClearCache = () => {
-	invoke('clear_audio_cache')
+const onRebuildCache = () => {
+	invoke('rebuild_audio_cache')
 		.catch(console.error)
 }
 
@@ -56,8 +56,8 @@ export const Settings = () => {
 		<div
 			className='w-80 h-96 flex flex-col justify-start items-center gap-2 bg-background overflow-hidden p-4'
 			ref={containerRef}
-		>
-			<Button onClick={onClearCache}>Limpar cache de áudio</Button>
+		>		
+			<Button onClick={onRebuildCache}>Recriar cache de áudio</Button>
 
 			<Button onClick={hasUpdate ? onInstall : onCheck}>{hasUpdate
 				? 'Clique para actualizar'
