@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fs::File;
 use std::{borrow::BorrowMut, future::IntoFuture};
@@ -6,7 +7,7 @@ use std::time::{self, Duration};
 use std::io::BufReader;
 
 use futures::future::try_join_all;
-use rodio::{Decoder, OutputStream, Source};
+use rodio::Source;
 use tauri::{async_runtime::Mutex, AppHandle, LogicalPosition, Manager, State, Window, WindowBuilder, WindowUrl};
 
 use crate::firefight::{audio, events::*, local_store::*, types::*};
@@ -474,11 +475,17 @@ static PROSODY_END: &str = "</amazon:effect></prosody>";
 #[tauri::command]
 pub async fn alarm(
     app_handle: AppHandle,
+	playback_sink: State<'_, Mutex<rodio::Sink>>,
     occurrence: String,
     staff: Option<Vec<String>>,
     vehicles: Vec<String>,
 ) -> Result<(), String> {
     println!("Alert command received, vehicles: {:?}, staff: {:?}, occurrence: {}", vehicles, staff, occurrence);
+	
+	let mut audio_mutex = playback_sink.lock().into_future().await;
+	let audio_mutex_ref = audio_mutex.borrow_mut();
+	let playback_sink = audio_mutex_ref.deref_mut();
+
     let mut sorted_staff = staff.unwrap_or_default()
         .iter()
         .map(|s| s.trim_start_matches('0').to_uppercase())
@@ -550,29 +557,25 @@ pub async fn alarm(
         println!("Audio found in cache, playing...");
     }
 
-    // Get a output stream handle to the default physical sound device
-    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-    let sink = rodio::Sink::try_new(&stream_handle).unwrap();
-
     let mut has_alert = false;
     if let Ok(alert_file) = audio::get_audio_resource(&app_handle, "alert") {
         let file: BufReader<File> = BufReader::new(alert_file);
-        let source = Decoder::new(file).unwrap();
-        sink.append(source);
+        let source = rodio::Decoder::new(file).unwrap();
+        playback_sink.append(source);
 
         has_alert = true;
     }
 
     let file: BufReader<File> = BufReader::new(put_audio_cache_result.unwrap());
-    let source = Decoder::new(file).unwrap();
+    let source = rodio::Decoder::new(file).unwrap();
     
     if has_alert {
-        sink.append(source.delay(Duration::from_millis(500)));
+        playback_sink.append(source.delay(Duration::from_millis(500)));
     } else {
-        sink.append(source);
+        playback_sink.append(source);
     }
     
-    sink.sleep_until_end();
+    playback_sink.sleep_until_end();
 
     Ok(())
 }
@@ -594,10 +597,15 @@ async fn synthesize_pattern(app_handle: &AppHandle, syntherizer: &aws_sdk_polly:
 pub async fn alert(
     app_handle: AppHandle,
 	state: State<'_, Mutex<LocalStore>>,
+	playback_sink: State<'_, Mutex<rodio::Sink>>,
     occurrence_id: String,
     vehicle_assignment_map: HashMap<String, Vec<String>>
 ) -> Result<(), String> {
     println!("Alert v2 command received, vehicle_staff_assignment {:?}, occurrenceId: {}", vehicle_assignment_map, occurrence_id);
+
+	let mut audio_mutex = playback_sink.lock().into_future().await;
+	let audio_mutex_ref = audio_mutex.borrow_mut();
+	let playback_sink = audio_mutex_ref.deref_mut();
     
 	let mut state_mutex = state.lock().into_future().await;
 	let state_mutex_ref = state_mutex.borrow_mut();
@@ -627,6 +635,18 @@ pub async fn alert(
         .collect::<Vec<(String, Vec<String>)>>();
     
     vehicle_sets.sort_by(|(a, _sa), (b, _sb)| {
+		let a_cap = state.get_vehicle_capacity(a).unwrap_or_default();
+		let b_cap = state.get_vehicle_capacity(b).unwrap_or_default();
+
+		if a_cap.is_some() && b_cap.is_none() { return Ordering::Less }
+		if b_cap.is_some() && a_cap.is_none() { return Ordering::Greater }
+		
+		let a_cap = a_cap.unwrap_or_default();
+		let b_cap = b_cap.unwrap_or_default();
+
+		// Larger capacity first, so b_cap cmp with a_cap
+		if a_cap != b_cap { return b_cap.cmp(&a_cap) }
+
         let mut a_value = state.get_vehicle_label(a).unwrap_or_default().to_uppercase();
         a_value.retain(|c| !c.is_whitespace());
               
@@ -712,34 +732,31 @@ pub async fn alert(
 
     
     // Get a output stream handle to the default physical sound device
-    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-    let sink = rodio::Sink::try_new(&stream_handle).unwrap();
 
-    
     // Enqueue
     // Alert
-    sink.append(Decoder::new(BufReader::new(alert_cue)).unwrap());
-	sink.append(Decoder::new(BufReader::new(occurrence_cue)).unwrap());
+    playback_sink.append(rodio::Decoder::new(BufReader::new(alert_cue)).unwrap());
+	playback_sink.append(rodio::Decoder::new(BufReader::new(occurrence_cue)).unwrap());
 
 	audio_cues
 		.into_iter()
 		.for_each(|(vehicle_cue, staff_cues)| {
 			let vehicle_start = audio::get_audio_cache(&app_handle, &audio::get_string_hash(&String::from(VEHICLE_SPEECH))).unwrap();
-			sink.append(Decoder::new(BufReader::new(vehicle_start)).unwrap());
-			sink.append(Decoder::new(BufReader::new(vehicle_cue)).unwrap());
+			playback_sink.append(rodio::Decoder::new(BufReader::new(vehicle_start)).unwrap());
+			playback_sink.append(rodio::Decoder::new(BufReader::new(vehicle_cue)).unwrap());
 
 			if !staff_cues.is_empty() {
 				let staff_start = audio::get_audio_cache(&app_handle, &audio::get_string_hash(&String::from(STAFF_SPEECH))).unwrap();
-				sink.append(Decoder::new(BufReader::new(staff_start)).unwrap());
+				playback_sink.append(rodio::Decoder::new(BufReader::new(staff_start)).unwrap());
 				
 				staff_cues
 					.into_iter()
-					.for_each(|staff_cue| sink.append(Decoder::new(BufReader::new(staff_cue)).unwrap()));
+					.for_each(|staff_cue| playback_sink.append(rodio::Decoder::new(BufReader::new(staff_cue)).unwrap()));
 			}
 
 		});
     
-    sink.sleep_until_end();
+	playback_sink.sleep_until_end();
 
     Ok(())
 }

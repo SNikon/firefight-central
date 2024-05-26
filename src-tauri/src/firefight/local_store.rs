@@ -148,6 +148,14 @@ impl FirefightDataManager for LocalStore {
 		let found_value = vehicle_store.get(vehicle_id).cloned().with_context(|| format!("No vehicle found with id: {}", vehicle_id))?;
 		Ok(found_value)
 	}
+
+	fn get_vehicle_capacity(&self, vehicle_id: &String) -> anyhow::Result<Option<u8>> {
+		let vehicles_value = self.get("vehicles").with_context(|| "Unable to read vehicles from store".to_string())?.clone();
+		let vehicle_store = serde_json::from_value::<HashMap<String, Vehicle>>(vehicles_value).with_context(|| "Failed to deserialize vehicles".to_string())?;
+
+		let found_value = vehicle_store.get(vehicle_id).with_context(|| format!("No vehicle found with id: {}", vehicle_id)).map(|vehicle| vehicle.capacity)?;
+		Ok(found_value)
+    }
 	
 	fn get_vehicle_label(&self, vehicle_id: &String) -> anyhow::Result<String> {
 		let vehicles_value = self.get("vehicles").with_context(|| "Unable to read vehicles from store".to_string())?.clone();

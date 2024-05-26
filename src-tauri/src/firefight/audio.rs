@@ -1,5 +1,10 @@
 use std::{io::Write, hash::Hasher};
 
+pub fn create_sink() -> rodio::Sink {
+    let (_stream, stream_handle) = rodio::OutputStream::try_default().unwrap();
+    rodio::Sink::try_new(&stream_handle).unwrap()
+}
+
 pub fn get_string_hash(string: &String) -> String {
 	let mut hasher = std::collections::hash_map::DefaultHasher::new();
 	hasher.write(string.as_bytes());
