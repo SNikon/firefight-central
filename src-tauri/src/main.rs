@@ -9,10 +9,14 @@ use tauri::{async_runtime::Mutex, Manager};
 
 #[cfg(dev)]
 #[tauri::command]
-fn get_environment() -> String { String::from("development") }
+fn get_environment() -> String {
+    String::from("development")
+}
 #[cfg(not(dev))]
 #[tauri::command]
-fn get_environment() -> String { String::from("production") }
+fn get_environment() -> String {
+    String::from("production")
+}
 
 fn main() {
     tauri::Builder::default()
@@ -33,7 +37,6 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             get_environment,
-            commands::alarm,
             commands::alert,
             commands::get_store,
             commands::create_active_occurrence,

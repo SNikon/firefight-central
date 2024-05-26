@@ -11,9 +11,7 @@ import { StaffCard } from '../../../_components/StaffCard'
 import { Modal } from '../../../_components/Modal'
 import { ActiveOccurrenceWizard } from '../ActiveOccurrenceWizard'
 import { Header, HeaderSection } from '../../../_components/Header'
-import { useEscapeKey } from '../../../_utils/useEscapeKey'
-import { useAlertSelection } from '../../../_utils/useAlertSelection'
-import { sendCustomAlert } from '../../../_utils/sendAlert'
+import { sendOccurrenceAlert } from '../../../_utils/sendAlert'
 
 type OccurrencePanelProps = {
 	internalId: string
@@ -45,45 +43,30 @@ export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ inter
 		return entrySet
 	}, [staffMap])
 
+	const onSendAlert = () => {
+		sendOccurrenceAlert(
+			activeOccurrence.occurrenceId,
+			activeOccurrence.vehicleAssignmentMap
+		)
+	}
+
 	const onDelete = () => {
 		deleteActiveOccurrence$.next(internalId)
 		onClose()
 	}
 	
-	const {
-		onEndSelection,
-		selectedStaff,
-		selectedVehicles,
-		showSelection,
-		onStartSelection,
-		onToggleStaff,
-		onToggleVehicle
-	} = useAlertSelection(activeOccurrence.staffIds, activeOccurrence.vehicleIds)
-
-	const onSendAlert = () => {
-		if (selectedStaff.length && selectedVehicles.length) {
-			sendCustomAlert(activeOccurrence.occurrenceId, selectedStaff, selectedVehicles)
-		}
-		
-		onEndSelection()
-	}
-
 	const [showCreateOccurrence, setShowCreateOccurrence] = useState(false)
-	useEscapeKey(onClose, showCreateOccurrence || showSelection)
-	useEscapeKey(onEndSelection, !showSelection)
-	
+		
 	return <div className='absolute top-0 left-0 flex flex-col w-full h-full z-10 select-none bg-background text-primary pb-5'>
 		<Header className='bg-backgroundEmphasis mb-5'>
 			<HeaderSection>
-				{!showSelection && <Button onClick={onClose}>Voltar atrás</Button>}
+				<Button onClick={onClose}>Voltar atrás</Button>
 			</HeaderSection>
 
 			<HeaderSection>
-				{!showSelection && <Button onClick={onStartSelection}>Enviar alerta</Button>}
-				{!showSelection && <Button onClick={setShowCreateOccurrence.bind(null, true)}>Alterar recursos</Button>}
-				{!showSelection && <Button onClick={onDelete}>Fechar ocorrência</Button>}
-				{showSelection && <Button onClick={onEndSelection}>Cancelar alerta</Button>}
-				{showSelection && <Button onClick={onSendAlert}>Confirmar alerta</Button>}
+				<Button onClick={onSendAlert}>Enviar alerta</Button>
+				<Button onClick={setShowCreateOccurrence.bind(null, true)}>Alterar recursos</Button>
+				<Button onClick={onDelete}>Fechar ocorrência</Button>
 			</HeaderSection>
 		</Header>
 
@@ -102,13 +85,10 @@ export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ inter
 				{sortedVehicles.map(vehicle => (
 					<VehicleCard
 						key={vehicle.internalId}
-						disabled={!showSelection}
 						label={vehicle.label}
 						image={vehicle.image}
 						internalId={vehicle.internalId}
-						onClick={onToggleVehicle}
 						small
-						selected={selectedVehicles.includes(vehicle.internalId)}
 						state={vehicle.state}
 					/>
 				))}
@@ -122,14 +102,11 @@ export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ inter
 				{sortedStaff.map(staff => (
 					<StaffCard
 						key={staff.internalId}
-						disabled={!showSelection}
 						label={staff.label}
 						image={staff.image}
 						internalId={staff.internalId}
 						name={staff.name}
-						onClick={onToggleStaff}
 						small
-						selected={selectedStaff.includes(staff.internalId)}
 						state={staff.state}
 					/>
 				))}

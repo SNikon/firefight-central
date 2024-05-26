@@ -1,12 +1,16 @@
-use anyhow::{Context,Result};
-use aws_sdk_polly::{primitives::AggregatedBytes, types::{Engine, LanguageCode, OutputFormat, TextType, VoiceId}, Client};
+use anyhow::{Context, Result};
+use aws_sdk_polly::{
+    primitives::AggregatedBytes,
+    types::{Engine, LanguageCode, OutputFormat, TextType, VoiceId},
+    Client,
+};
 
 pub enum Synthesizable {
     Occurrence(String),
     Pattern(String),
     Raw(String),
     Staff(String),
-    Vehicle(String)
+    Vehicle(String),
 }
 
 static SLOW_SPEECH: &str = "<speak><prosody rate=\"medium\"><amazon:effect name=\"drc\">";
@@ -31,7 +35,7 @@ impl Synthesizable {
 }
 
 async fn synthesize_text(client: &Client, text: &String) -> Result<AggregatedBytes> {
-	println!("Synthesizing: {}", text);
+    println!("Synthesizing: {}", text);
     let resp = client
         .synthesize_speech()
         .output_format(OutputFormat::OggVorbis)
@@ -42,19 +46,18 @@ async fn synthesize_text(client: &Client, text: &String) -> Result<AggregatedByt
         .engine(Engine::Neural)
         .send()
         .await
-		.context("Failed to synthesize speech")?;
+        .context("Failed to synthesize speech")?;
 
     // Get MP3 data from response and save it
     let blob = resp
         .audio_stream
         .collect()
         .await
-		.context("Failed to collect audio stream")?;
+        .context("Failed to collect audio stream")?;
 
-	println!("Synthesized buffer received for text: {}", text);
-	Ok(blob)
+    println!("Synthesized buffer received for text: {}", text);
+    Ok(blob)
 }
-
 
 pub async fn synthesize(client: &Client, value: &Synthesizable) -> Result<AggregatedBytes> {
     let speech_text = value.to_speech();
