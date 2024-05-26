@@ -115,6 +115,7 @@ pub trait FirefightDataManager {
 	fn get_staff_label(&self, staff_id: &String) -> anyhow::Result<String>;
 	fn get_staff_list(&self) -> anyhow::Result<Vec<Staff>>;
 	fn get_vehicle(&self, vehicle_id: &String) -> anyhow::Result<Vehicle>;
+	fn get_vehicle_capacity(&self, vehicle_id: &String) -> anyhow::Result<Option<u8>>;
 	fn get_vehicle_label(&self, vehicle_id: &String) -> anyhow::Result<String>;
 	fn get_vehicle_list(&self) -> anyhow::Result<Vec<Vehicle>>;
 

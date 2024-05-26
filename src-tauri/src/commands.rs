@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fs::File;
 use std::{borrow::BorrowMut, future::IntoFuture};
@@ -627,6 +628,18 @@ pub async fn alert(
         .collect::<Vec<(String, Vec<String>)>>();
     
     vehicle_sets.sort_by(|(a, _sa), (b, _sb)| {
+		let a_cap = state.get_vehicle_capacity(a).unwrap_or_default();
+		let b_cap = state.get_vehicle_capacity(b).unwrap_or_default();
+
+		if a_cap.is_some() && b_cap.is_none() { return Ordering::Less }
+		if b_cap.is_some() && a_cap.is_none() { return Ordering::Greater }
+		
+		let a_cap = a_cap.unwrap_or_default();
+		let b_cap = b_cap.unwrap_or_default();
+
+		// Larger capacity first, so b_cap cmp with a_cap
+		if a_cap != b_cap { return b_cap.cmp(&a_cap) }
+
         let mut a_value = state.get_vehicle_label(a).unwrap_or_default().to_uppercase();
         a_value.retain(|c| !c.is_whitespace());
               

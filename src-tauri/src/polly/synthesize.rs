@@ -18,7 +18,12 @@ impl Synthesizable {
         match self {
             Synthesizable::Occurrence(label) => format!("{}Saída <phoneme alphabet=\"ipa\" ph=\"pɐ.ɾɐ\">para</phoneme> <break strength=\"weak\" /> {}{}", SLOW_SPEECH, label, SPEECH_END),
             Synthesizable::Pattern(label) => format!("{}{}{}", SLOW_SPEECH, label, SPEECH_END),
-            Synthesizable::Vehicle(label) => format!("{}<say-as interpret-as=\"spell-out\">{}</say-as>{}", X_SLOW_SPEECH, label, SPEECH_END),
+            Synthesizable::Vehicle(label) => format!("{}<say-as interpret-as=\"spell-out\">{}</say-as>{}",
+                X_SLOW_SPEECH,
+                label
+                    .to_uppercase()
+                    .replace("S", "</say-as><phoneme alphabet=\"ipa\" ph=\"ˈɛs\">S</phoneme><say-as interpret-as=\"spell-out\">"),
+                SPEECH_END),
             Synthesizable::Raw(text) => text.clone(),
             Synthesizable::Staff(label) => format!("{}{}{}", SLOW_SPEECH, label.trim_start_matches('0'), SPEECH_END),
         }
