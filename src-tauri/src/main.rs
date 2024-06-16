@@ -33,10 +33,12 @@ fn main() {
         .setup(|app| {
             let store = firefight::local_store::create_store(app.app_handle());
             app.manage(Mutex::new(store));
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             get_environment,
+            commands::get_version,
             commands::alert,
             commands::get_store,
             commands::create_active_occurrence,

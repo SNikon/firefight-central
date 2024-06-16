@@ -37,6 +37,10 @@ fn default_rank() -> StaffRank {
     StaffRank::Unknown
 }
 
+fn default_national_id() -> String {
+    String::from("")
+}
+
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Staff {
@@ -44,6 +48,8 @@ pub struct Staff {
     pub image: String,
     pub label: String,
     pub name: String,
+    #[serde(default = "default_national_id")]
+    pub national_id: String,
     #[serde(default = "default_rank")]
     pub rank: StaffRank,
     pub state: StaffState,

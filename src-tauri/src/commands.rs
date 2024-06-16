@@ -3,11 +3,11 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::ops::DerefMut;
-use std::time::{self, Duration};
+use std::time;
 use std::{borrow::BorrowMut, future::IntoFuture};
 
 use futures::future::try_join_all;
-use rodio::{Decoder, OutputStream, Source};
+use rodio::{Decoder, OutputStream};
 use tauri::{
     async_runtime::Mutex, AppHandle, LogicalPosition, Manager, State, Window, WindowBuilder,
     WindowUrl,
@@ -18,6 +18,11 @@ use crate::polly;
 
 const VEHICLE_SPEECH: &str = "Veículo";
 const STAFF_SPEECH: &str = "Guarnição";
+
+#[tauri::command]
+pub async fn get_version(app_handle: AppHandle) -> String {
+    app_handle.package_info().version.to_string()
+}
 
 #[tauri::command]
 pub async fn get_store(state: State<'_, Mutex<LocalStore>>) -> Result<DataStore, String> {

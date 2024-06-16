@@ -54,6 +54,7 @@ export type Staff = {
 	image: string
 	label: string
 	name: string
+	nationalId: string
 	rank: StaffRank
 	state: StaffState
 }

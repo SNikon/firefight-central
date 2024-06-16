@@ -45,6 +45,11 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 		setStaffName(e.target.value)
 	}
 
+	const [staffNationalId, setStaffNationalId] = useState('')
+	const onStaffNationalIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setStaffNationalId(e.target.value)
+	}
+
 	const [staffRank, setStaffRank] = useState(StaffRank.Unknown)
 	const onStaffRankChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		setStaffRank(e.target.value as StaffRank)
@@ -67,6 +72,7 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 		setStaffState(staff.state)
 		setStaffRank(staff.rank)
 		setStaffName(staff.name)
+		setStaffNationalId(staff.nationalId)
 	}, [internalId, staffMap])
 
 	const onSave = () => {
@@ -74,6 +80,7 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 			internalId: internalId ?? '',
 			label: staffId,
 			name: staffName,
+			nationalId: staffNationalId,
 			rank: staffRank,
 			state: staffState,
 			image: ''
@@ -118,6 +125,15 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 				onChange={onStaffNameChange}
 				placeholder='Nome'
 				value={staffName}
+			/>
+
+			
+			<label className='mt-5 text-action'>Número Mecanográfico</label>
+			<input
+				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
+				onChange={onStaffNationalIdChange}
+				placeholder='Número Mecanográfico'
+				value={staffNationalId}
 			/>
 
 			<label className='mt-5 text-action'>Posto</label>

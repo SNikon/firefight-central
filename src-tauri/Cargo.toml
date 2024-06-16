@@ -26,6 +26,7 @@ rodio = "0.17.3"
 proc-macro2 = "1.0.76"
 uuid = { version = "1.6.1", features = ["v4"] }
 futures = "0.3.30"
+rust_socketio = "0.6.0"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
