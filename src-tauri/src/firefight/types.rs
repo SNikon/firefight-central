@@ -88,25 +88,25 @@ pub struct Vehicle {
     pub category: VehicleCategory,
     pub image: String,
     pub label: String,
+    pub license_plate: Option<String>,
     pub state: VehicleState,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ActiveOccurrence {
+    pub address: Option<String>,
+    pub codu_number: Option<String>,
     pub creation_time: Option<u128>,
+    pub description: Option<String>,
     pub internal_id: String,
+    pub location: Option<String>,
     pub occurrence_id: String,
+    pub reference_point: Option<String>,
     pub staff_ids: Vec<String>,
     #[serde(default)]
     pub vehicle_assignment_map: HashMap<String, Vec<String>>,
     pub vehicle_ids: Vec<String>,
-
-    pub address: Option<String>,
-    pub location: Option<String>,
-    pub description: Option<String>,
-    pub reference_point: Option<String>,
-    pub codu_number: Option<String>,
     pub vmer_siv: Option<bool>,
 }
 

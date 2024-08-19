@@ -24,6 +24,11 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 		setVehicleId(e.target.value)
 	}
 
+	const [vehicleLicensePlate, setVehicleLicensePlate] = useState('')
+	const onVehicleLicensePlateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setVehicleLicensePlate(e.target.value?.toUpperCase())
+	}
+
 	const [vehicleCapacity, setVehicleCapacity] = useState('')
 	const onVehicleCapacityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setVehicleCapacity(e.target.value)
@@ -43,6 +48,7 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 		}
 
 		setVehicleId(vehicle.label)
+		setVehicleLicensePlate(vehicle.licensePlate ?? '')
 		setVehicleCapacity(vehicle.capacity?.toString() ?? '')
 		setVehicleState(vehicle.state)
 	}, [internalId, vehicleMap])
@@ -54,6 +60,7 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 			internalId: internalId ?? '',
 			capacity: parsedCapacity,
 			label: vehicleId,
+			licensePlate: vehicleLicensePlate,
 			state: vehicleState,
 			image: ''
 		} satisfies Vehicle
@@ -89,6 +96,14 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 				onChange={onVehicleIdChange}
 				placeholder='Identificador'
 				value={vehicleId}
+			/>
+
+			<label className='mt-5 text-action'>Matricula</label>
+			<input
+				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
+				onChange={onVehicleLicensePlateChange}
+				placeholder='Matricula'
+				value={vehicleLicensePlate}
 			/>
 
 			<label className='mt-5 text-action'>Capacidade</label>

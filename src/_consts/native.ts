@@ -40,6 +40,7 @@ export type Vehicle = {
 	capacity?: number
 	image: string
 	label: string
+	licensePlate?: string
 	state: VehicleState
 }
 

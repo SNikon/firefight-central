@@ -1,5 +1,5 @@
 export const shortenName = (name: string): string => {
-	const names = name.split(/\s+/)
+	const names = name.trim().split(/\s+/)
 	if (names.length === 1) {
 		return name
 	}
