@@ -1,11 +1,12 @@
 import { type FunctionComponent, useEffect, useState } from 'react'
 import { useObservable } from 'react-use'
-import { type Staff, StaffState, StaffRank } from '../../../_consts/native'
+import { type Staff, StaffState, StaffRank, StaffPermission } from '../../../_consts/native'
 import { createStaff$, deleteStaff$, staff$, updateStaff$ } from '../../../_state/store'
 import { Button } from '../../../_components/Button'
 import { useEscapeKey } from '../../../_utils/useEscapeKey'
 import { staffStateToLocale } from '../../../_utils/staffStateToLocale'
 import { staffRankToLocale } from '../../../_utils/staffRankToLocale'
+import { staffPermissionToLocale } from '../../../_utils/permissionToLocale'
 
 const stateOptions = [
 	StaffState.Available,
@@ -26,6 +27,13 @@ const rankOptions = [
 	StaffRank.Rank1,
 	StaffRank.Rank0
 ].map(value => ({ value: value, label: staffRankToLocale(value) }))
+
+const permissionOptions = [
+	StaffPermission.All,
+	StaffPermission.Shift,
+	StaffPermission.Own,
+	StaffPermission.None
+].map(value => ({ value: value, label: staffPermissionToLocale(value) }))
 
 type StaffPanelProps = {
 	internalId: string | undefined
@@ -60,6 +68,11 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 		setStaffState(e.target.value as StaffState)
 	}
 
+	const [staffPermission, setStaffPermission] = useState(StaffPermission.Own)
+	const onStaffPermissionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		setStaffPermission(e.target.value as StaffPermission)
+	}
+
 	const [staffImage, setStaffImage] = useState('')
 	const onStaffImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0]
@@ -82,10 +95,11 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 
 		setStaffId(staff.label)
 		setStaffImage(staff.image ?? '')
-		setStaffState(staff.state)
-		setStaffRank(staff.rank)
 		setStaffName(staff.name)
 		setStaffNationalId(staff.nationalId)
+		setStaffPermission(staff.permission)
+		setStaffRank(staff.rank)
+		setStaffState(staff.state)
 	}, [internalId, staffMap])
 
 	const onSave = () => {
@@ -95,6 +109,7 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 			label: staffId,
 			name: staffName,
 			nationalId: staffNationalId,
+			permission: staffPermission,
 			rank: staffRank,
 			state: staffState
 		} satisfies Staff
@@ -182,6 +197,17 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 				onChange={onStaffImageChange}
 				type='file'
 			/>
+
+			<label className='mt-5 text-action'>Permissões de acesso</label>
+			<select
+				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
+				onChange={onStaffPermissionChange}
+				value={staffPermission}
+			>
+				{permissionOptions.map(option => (
+					<option key={option.value} value={option.value}>{option.label}</option>
+				))}
+			</select>
 
 			<div className='flex flex-row justify-between mt-10'>
 				<div className='space-x-5'>

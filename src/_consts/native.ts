@@ -65,12 +65,20 @@ export enum StaffRank {
 	Rank8 = 'rank8'
 }
 
+export enum StaffPermission {
+	All = 'all',
+	Shift = 'shift',
+	Own = 'own',
+	None = 'none'
+}
+
 export type Staff = {
 	internalId: string
 	image: string
 	label: string
 	name: string
 	nationalId: string
+	permission: StaffPermission
 	rank: StaffRank
 	state: StaffState
 }

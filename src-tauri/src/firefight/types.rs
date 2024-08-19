@@ -33,6 +33,19 @@ pub enum StaffState {
     Unavailable,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum StaffPermission {
+    All,
+    Shift,
+    Own,
+    None
+}
+
+fn default_permission() -> StaffPermission {
+    StaffPermission::Own
+}
+
 fn default_rank() -> StaffRank {
     StaffRank::Unknown
 }
@@ -50,6 +63,8 @@ pub struct Staff {
     pub name: String,
     #[serde(default = "default_national_id")]
     pub national_id: String,
+    #[serde(default = "default_permission")]
+    pub permission: StaffPermission,
     #[serde(default = "default_rank")]
     pub rank: StaffRank,
     pub state: StaffState,
