@@ -38,7 +38,7 @@ export const VehicleCard: FunctionComponent<VehicleCardProps> = props => {
 				<div className='rounded relative flex flex-1 flex-col w-full h-full overflow-hidden justify-center items-center'>
 					{!props.small && (
 						<div className='flex flex-col align-middle justify-center overflow-hidden rounded'>
-							<img className='max-h-fit object-contain' src={imgSource} />
+							<img className='w-100 object-contain' src={imgSource} />
 						</div>
 					)}
 

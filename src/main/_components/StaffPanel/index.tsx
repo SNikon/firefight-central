@@ -60,6 +60,18 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 		setStaffState(e.target.value as StaffState)
 	}
 
+	const [staffImage, setStaffImage] = useState('')
+	const onStaffImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0]
+		if (!file) { return }
+
+		const reader = new FileReader()
+		reader.onload = () => {
+			setStaffImage(reader.result as string)
+		}
+		reader.readAsDataURL(file)
+	}
+	
 	const canSave = staffName.trim() && staffId.trim()
 
 	useEffect(() => {
@@ -69,6 +81,7 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 		}
 
 		setStaffId(staff.label)
+		setStaffImage(staff.image ?? '')
 		setStaffState(staff.state)
 		setStaffRank(staff.rank)
 		setStaffName(staff.name)
@@ -78,12 +91,12 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 	const onSave = () => {
 		const staff = {
 			internalId: internalId ?? '',
+			image: staffImage,
 			label: staffId,
 			name: staffName,
 			nationalId: staffNationalId,
 			rank: staffRank,
-			state: staffState,
-			image: ''
+			state: staffState
 		} satisfies Staff
 
 		const tg$ = internalId ? updateStaff$ : createStaff$
@@ -106,7 +119,7 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 	return <div className='absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full z-10 select-none'>
 		<div className='absolute top-0 left-0 w-full h-full backdrop-blur-md' />
 
-		<div className='flex flex-col bg-[#000] text-primary p-5 rounded-xl z-10 w-full max-w-2xl'>
+		<div className='flex flex-col bg-[#000] text-primary p-5 rounded-xl z-10 w-full max-w-2xl max-h-[calc(100vh-50px)] overflow-y-auto'>
 			<div className='text-2xl font-extrabold'>
 				{internalId ? 'Gerir' : 'Adicionar'} bombeiro
 			</div>
@@ -158,6 +171,17 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 					<option key={option.value} value={option.value}>{option.label}</option>
 				))}
 			</select>
+
+			<label className='mt-5 text-action'>Imagem</label>
+			{staffImage && <div className='flex flex-row justify-center'>
+				<img className='max-h-[150px] p-2 rounded border border-[#000]/50' src={staffImage} />
+			</div>}
+			<input
+				accept='image/*'
+				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
+				onChange={onStaffImageChange}
+				type='file'
+			/>
 
 			<div className='flex flex-row justify-between mt-10'>
 				<div className='space-x-5'>

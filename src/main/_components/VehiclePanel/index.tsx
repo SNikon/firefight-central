@@ -34,6 +34,18 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 		setVehicleCapacity(e.target.value)
 	}
 
+	const [vehicleImage, setVehicleImage] = useState('')
+	const onVehicleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0]
+		if (!file) { return }
+
+		const reader = new FileReader()
+		reader.onload = () => {
+			setVehicleImage(reader.result as string)
+		}
+		reader.readAsDataURL(file)
+	}
+	
 	const [vehicleState, setVehicleState] = useState(VehicleState.Available)
 	const onVehicleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		setVehicleState(e.target.value as VehicleState)
@@ -48,6 +60,7 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 		}
 
 		setVehicleId(vehicle.label)
+		setVehicleImage(vehicle.image ?? '')
 		setVehicleLicensePlate(vehicle.licensePlate ?? '')
 		setVehicleCapacity(vehicle.capacity?.toString() ?? '')
 		setVehicleState(vehicle.state)
@@ -59,10 +72,10 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 		const vehicle = {
 			internalId: internalId ?? '',
 			capacity: parsedCapacity,
+			image: vehicleImage,
 			label: vehicleId,
 			licensePlate: vehicleLicensePlate,
-			state: vehicleState,
-			image: ''
+			state: vehicleState
 		} satisfies Vehicle
 
 		const tg$ = internalId ? updateVehicle$ : createVehicle$
@@ -85,7 +98,7 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 	return <div className='absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full z-10 select-none'>
 		<div className='absolute top-0 left-0 w-full h-full backdrop-blur-md' />
 
-		<div className='flex flex-col bg-[#000] text-primary p-5 rounded-xl z-10 w-full max-w-2xl'>
+		<div className='flex flex-col bg-[#000] text-primary p-5 rounded-xl z-10 w-full max-w-2xl max-h-[calc(100vh-50px)] overflow-y-auto'>
 			<div className='text-2xl font-extrabold'>
 				{internalId ? 'Gerir' : 'Adicionar'} veículo
 			</div>
@@ -125,6 +138,17 @@ export const VehiclePanel: FunctionComponent<VehiclePanelProps> = ({ internalId,
 					<option key={option.value} value={option.value}>{option.label}</option>
 				))}
 			</select>
+
+			`<label className='mt-5 text-action'>Imagem</label>
+			{vehicleImage && <div className='flex flex-row justify-center'>
+				<img className='max-h-[150px] p-2 rounded border border-[#000]/50' src={vehicleImage} />
+			</div>}
+			<input
+				accept='image/*'
+				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
+				onChange={onVehicleImageChange}
+				type='file'
+			/>`
 
 			<div className='flex flex-row justify-between mt-10'>
 				<div className='space-x-5'>
