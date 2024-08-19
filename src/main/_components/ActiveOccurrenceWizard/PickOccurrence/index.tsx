@@ -2,7 +2,7 @@ import { type FunctionComponent, useMemo } from 'react'
 import { useObservable } from 'react-use'
 import { CardGrid } from '../../../../_components/CardGrid'
 import { Scrollable } from '../../../../_components/Scrollable'
-import { Header } from '../../../../_components/Header'
+import { Header, HeaderSection } from '../../../../_components/Header'
 import { Button } from '../../../../_components/Button'
 import { occurrences$ } from '../../../../_state/store'
 import { OccurrenceCard } from '../../../../_components/OccurrenceCard'
@@ -12,9 +12,10 @@ type PickOccurrenceProps = {
 	initialValue: string
 	onCancel: () => void
 	onNext: (value: string) => void
+	onPrevious: () => void
 }
 
-export const PickOccurrence: FunctionComponent<PickOccurrenceProps> = ({ initialValue, onCancel, onNext }) => {
+export const PickOccurrence: FunctionComponent<PickOccurrenceProps> = ({ initialValue, onCancel, onNext, onPrevious }) => {
 	const occurrences = useObservable(occurrences$, {})
 	const sortedOccurrences = useMemo(() => {
 		const entries = Object.values(occurrences)
@@ -24,8 +25,15 @@ export const PickOccurrence: FunctionComponent<PickOccurrenceProps> = ({ initial
 
 	return (
 		<div className='w-full text-action flex flex-col overflow-hidden'>
+			
 			<Header className="px-0 pt-0 mb-5">
-				<Button onClick={onCancel}>Cancelar</Button>
+				<HeaderSection>
+					<Button onClick={onCancel}>Cancelar</Button>
+				</HeaderSection>
+				
+				<HeaderSection>
+					{onPrevious && <Button onClick={onPrevious}>Voltar</Button>}
+				</HeaderSection>
 			</Header>
 
 			<Scrollable>

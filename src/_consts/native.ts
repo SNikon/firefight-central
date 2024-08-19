@@ -1,11 +1,26 @@
 
+export type OccurrenceInfo = {
+	address: string
+	description: string
+	location: string
+	coduNumber: string
+	referencePoint: string
+	vmerSiv: boolean
+}
+
 export type ActiveOccurrence = {
+	address?: string
 	creationTime?: number
+	description?: string
 	internalId: string
+	location?: string
+	coduNumber?: string
 	occurrenceId: string
 	vehicleAssignmentMap: Record<string, string[]>
 	vehicleIds: string[]
+	referencePoint?: string
 	staffIds: string[]
+	vmerSiv?: boolean
 }
 
 export type Occurrence = {

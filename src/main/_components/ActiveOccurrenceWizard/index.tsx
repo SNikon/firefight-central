@@ -3,15 +3,17 @@ import { useObservable } from 'react-use'
 import { activeOccurrences$, createActiveOccurrence$, staff$, updateActiveOccurrence$, vehicles$ } from '../../../_state/store'
 import { FullscreenOverlay } from '../../../_components/FullScreenOverlay'
 import { useEscapeKey } from '../../../_utils/useEscapeKey'
-import { Vehicle } from '../../../_consts/native'
+import { OccurrenceInfo, Vehicle } from '../../../_consts/native'
 import { PickOccurrence } from './PickOccurrence'
 import { PickVehicles } from './PickVehicles'
 import { PickStaff } from './PickStaff'
 import { ConfirmOccurrence } from './ConfirmOccurrence'
+import { InformationPanel } from './InformationPanel'
 
 enum Section {
 	Confirm,
 	Occurrence,
+	Information,
 	Staff,
 	Vehicles
 }
@@ -38,11 +40,19 @@ type ActiveOccurrenceWizardProps = {
 }
 
 export const ActiveOccurrenceWizard: FunctionComponent<ActiveOccurrenceWizardProps> = ({ internalId, onClose }) => {
-	const [activeSection, setActiveSection] = useState(internalId ? Section.Vehicles: Section.Occurrence)
+	const [activeSection, setActiveSection] = useState(internalId ? Section.Vehicles: Section.Information)
 
 	const staffMap = useObservable(staff$, {})
 	const vehicleMap = useObservable(vehicles$, {})
 
+	const [ocurrenceInfo, setOccurrenceInfo] = useState<OccurrenceInfo>({
+		address: '',
+		description: '',
+		location: '',
+		coduNumber: '',
+		referencePoint: '',
+		vmerSiv: false
+	})
 	const [occurrenceId, setOccurrenceId] = useState('')
 	const [vehicleIds, setVehicleIds] = useState<string[]>([])
 	const [staffIds, setStaffIds] = useState<string[]>([])
@@ -62,6 +72,12 @@ export const ActiveOccurrenceWizard: FunctionComponent<ActiveOccurrenceWizardPro
 
 	const [vehicleIdx, setVehicleIdx] = useState(0)
 
+	const onInformationNext = useCallback((nextInfo: OccurrenceInfo) => {
+		setOccurrenceInfo(nextInfo)
+		setActiveSection(Section.Occurrence)
+	}, [])
+
+	const onOccurrencePrev = useCallback(setActiveSection.bind(null, Section.Information), [])
 	const onOccurrenceNext = useCallback((occurrenceId: string) => {
 		setOccurrenceId(occurrenceId)
 		setActiveSection(Section.Vehicles)
@@ -120,6 +136,7 @@ export const ActiveOccurrenceWizard: FunctionComponent<ActiveOccurrenceWizardPro
 		const target$ = internalId ? updateActiveOccurrence$ : createActiveOccurrence$
 		target$.next({
 			...activeOccurrence,
+			...ocurrenceInfo,
 			internalId: internalId ?? '',
 			occurrenceId,
 			staffIds,
@@ -138,11 +155,19 @@ export const ActiveOccurrenceWizard: FunctionComponent<ActiveOccurrenceWizardPro
 			<div className='absolute top-0 left-0 w-full h-full backdrop-blur-md' />
 
 			<div className='flex bg-[#000] rounded-xl z-10 w-full max-w-7xl max-h-full p-5 pb-10'>
+				{!internalId && (activeSection === Section.Information) && <InformationPanel
+					initialValue={ocurrenceInfo}
+					onCancel={onClose}
+					onNext={onInformationNext} 
+				/>}
+
 				{!internalId && (activeSection === Section.Occurrence) && <PickOccurrence
 					initialValue={occurrenceId}
 					onCancel={onClose}
+					onPrevious={onOccurrencePrev}
 					onNext={onOccurrenceNext}
 				/>}
+
 				{(activeSection === Section.Vehicles) && <PickVehicles
 					initialValue={vehicleIds}
 					onCancel={onClose}
@@ -150,6 +175,7 @@ export const ActiveOccurrenceWizard: FunctionComponent<ActiveOccurrenceWizardPro
 					onPrevious={internalId ? undefined : onVehiclesPrev}
 					vehicles={vehicleMap}
 				/>}
+
 				{(activeSection === Section.Staff) && <PickStaff
 					alreadySelectedStaffIds={selectedThusFar}
 					capacity={vehicleMap[vehicleIds[vehicleIdx]].capacity}
@@ -161,6 +187,7 @@ export const ActiveOccurrenceWizard: FunctionComponent<ActiveOccurrenceWizardPro
 					vehicleId={vehicleIds[vehicleIdx]}
 					vehicleLabel={vehicleMap[vehicleIds[vehicleIdx]].label}
 				/>}
+
 				{(activeSection === Section.Confirm) && <ConfirmOccurrence
 					activeOccurrence={activeOccurrence}
 					allowAlert={!internalId}

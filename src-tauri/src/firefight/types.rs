@@ -101,6 +101,13 @@ pub struct ActiveOccurrence {
     #[serde(default)]
     pub vehicle_assignment_map: HashMap<String, Vec<String>>,
     pub vehicle_ids: Vec<String>,
+
+    pub address: Option<String>,
+    pub location: Option<String>,
+    pub description: Option<String>,
+    pub reference_point: Option<String>,
+    pub codu_number: Option<String>,
+    pub vmer_siv: Option<bool>,
 }
 
 #[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]

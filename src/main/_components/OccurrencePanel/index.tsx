@@ -76,6 +76,48 @@ export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ inter
 			</div>
 		</div>
 
+		<div className='flex flex-row gap-2 px-5'>
+			<div className='font-extrabold'>
+				Localização
+			</div>
+			{activeOccurrence.location}
+		</div>
+
+		<div className='flex flex-row gap-2 px-5'>
+			<div className='font-extrabold'>
+				Morada
+			</div>
+			{activeOccurrence.address}
+		</div>
+		
+		<div className='flex flex-row gap-3 px-5'>
+			<div className='font-extrabold'>
+				Descrição
+			</div>
+			{activeOccurrence.description}
+		</div>
+
+		<div className='flex flex-row gap-2 px-5'>
+			<div className='font-extrabold'>
+				Ponto de Referência
+			</div>
+			{activeOccurrence.referencePoint}
+		</div>
+
+		<div className='flex flex-row gap-2 px-5'>
+			<div className='font-extrabold'>
+				Número CODU
+			</div>
+			{activeOccurrence.coduNumber}
+		</div>
+
+		<div className='flex flex-row gap-2 px-5'>
+			<div className='font-extrabold'>
+				VMER / SIV
+			</div>
+			{activeOccurrence.vmerSiv ? 'Sim' : 'Não'}
+		</div>
+
 		<Scrollable className='px-5'>
 			<h2 className='px-5 my-5 text-actionHighlight font-extrabold text-2xl'>
 				Veículos
