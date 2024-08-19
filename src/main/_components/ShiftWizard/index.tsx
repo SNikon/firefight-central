@@ -34,22 +34,27 @@ export const ShiftWizard: FunctionComponent<ShiftWizardProps> = ({ onClose }) =>
 			.map(staff => staff.internalId))
 	}, [staffReady])
 	
-	const onSelect = (vehicleId: string) => {
+	const onSelect = (staffId: string) => {
 		setSelected(prevSelected => {
-			const foundIdx = prevSelected.indexOf(vehicleId)
+			const foundIdx = prevSelected.indexOf(staffId)
 			if (foundIdx >= 0) {
 				const nextSelected = prevSelected.slice()
 				nextSelected.splice(foundIdx, 1)
 				return nextSelected
 			}
 
-			return [...prevSelected, vehicleId]
+			return [...prevSelected, staffId]
 		})
 	}
 
 	const onConfirm = () => {
 		updateShift$.next(selected)
 		onClose()
+	}
+
+	const onSelectShiftStaff = () => {
+		const shiftStaffIds = sortedStaff.filter(staff => staff.state === StaffState.Dispatched || staff.state === StaffState.Available).map((staff => staff.internalId))
+		setSelected(shiftStaffIds)
 	}
 
 	useEscapeKey(onClose)
@@ -66,6 +71,7 @@ export const ShiftWizard: FunctionComponent<ShiftWizardProps> = ({ onClose }) =>
 						</HeaderSection>
 						
 						<HeaderSection>
+							<Button onClick={onSelectShiftStaff}>Selecionar Turno</Button>
 							<Button onClick={onConfirm}>Confirmar</Button>
 						</HeaderSection>
 					</Header>
