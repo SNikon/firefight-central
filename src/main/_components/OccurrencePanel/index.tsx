@@ -12,6 +12,7 @@ import { Modal } from '../../../_components/Modal'
 import { ActiveOccurrenceWizard } from '../ActiveOccurrenceWizard'
 import { Header, HeaderSection } from '../../../_components/Header'
 import { sendOccurrenceAlert } from '../../../_utils/sendAlert'
+import { ConfirmationPanel } from '../ConfirmationPanel'
 
 type OccurrencePanelProps = {
 	internalId: string
@@ -49,8 +50,12 @@ export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ inter
 			activeOccurrence.vehicleAssignmentMap
 		)
 	}
-
-	const onDelete = () => {
+	
+	const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
+	const onDelete = setShowDeleteConfirmation.bind(null, true)
+	const onCancelDeletion = setShowDeleteConfirmation.bind(null, false)
+	
+	const onConfirmDeletion = () => {
 		deleteActiveOccurrence$.next(internalId)
 		onClose()
 	}
@@ -159,6 +164,16 @@ export const OccurrencePanel: FunctionComponent<OccurrencePanelProps> = ({ inter
 			<ActiveOccurrenceWizard
 				internalId={internalId}
 				onClose={setShowCreateOccurrence.bind(null, false)}
+			/>
+		</Modal>}
+
+		{showDeleteConfirmation && <Modal>
+			<ConfirmationPanel
+				acceptPrompt='Sim, fechar'
+				cancelPrompt='Não'
+				onClose={onCancelDeletion}
+				onConfirm={onConfirmDeletion}
+				prompt='Tem certeza que deseja fechar esta ocorrência?'
 			/>
 		</Modal>}
 	</div>
