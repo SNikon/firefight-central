@@ -2,8 +2,10 @@ name: Release
 
 on:
   push:
-    tags:
-      - '*'
+    branches:
+      - release
+    # tags:
+    #   - '*'
 
 jobs:
   build:
@@ -34,6 +36,9 @@ jobs:
           sudo apt-get install -y libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
         # webkitgtk 4.0 is for Tauri v1 - webkitgtk 4.1 is for Tauri v2.
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: setup node
         uses: actions/setup-node@v4
         with:
@@ -50,9 +55,6 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
-
-      - name: Enable Corepack
-        run: corepack enable
 
       - name: install node modules
         run: yarn install
