@@ -4,8 +4,8 @@ use tauri::AppHandle;
 use tauri_plugin_store::StoreBuilder;
 
 use super::types::{
-    ActiveOccurrence, DataStore, FirefightDataManager, Occurrence, Staff, StaffState, Vehicle,
-    VehicleState,
+    ActiveOccurrence, DataStore, FirefightDataManager, Occurrence, Staff, StaffState, Team,
+    TeamState, Vehicle, VehicleState,
 };
 
 pub type LocalStore = tauri_plugin_store::Store<tauri::Wry>;
@@ -56,6 +56,9 @@ pub fn create_store(app_handle: AppHandle) -> LocalStore {
 }
 
 pub fn get_data_store(state: &mut LocalStore) -> DataStore {
+    let default_teams = serde_json::json!({});
+    let teams = state.get("teams").unwrap_or_else(|| &default_teams);
+
     DataStore {
         active_occurrences: serde_json::from_value(
             state.get("active_occurrences").unwrap().clone(),
@@ -63,6 +66,7 @@ pub fn get_data_store(state: &mut LocalStore) -> DataStore {
         .unwrap(),
         occurrences: serde_json::from_value(state.get("occurrences").unwrap().clone()).unwrap(),
         staff: serde_json::from_value(state.get("staff").unwrap().clone()).unwrap(),
+        teams: serde_json::from_value(teams.clone()).unwrap(),
         vehicles: serde_json::from_value(state.get("vehicles").unwrap().clone()).unwrap(),
     }
 }
@@ -245,6 +249,47 @@ impl FirefightDataManager for LocalStore {
             .with_context(|| "Failed to deserialize staff".to_string())?;
 
         Ok(staff_store.values().cloned().collect())
+    }
+
+    fn get_team(&self, team_id: &String) -> anyhow::Result<Team> {
+        let teams_value = self
+            .get("teams")
+            .with_context(|| "Unable to read teams from store".to_string())?
+            .clone();
+        let teams_store = serde_json::from_value::<HashMap<String, Team>>(teams_value)
+            .with_context(|| "Failed to deserialize teams".to_string())?;
+
+        let found_value = teams_store
+            .get(team_id)
+            .cloned()
+            .with_context(|| format!("No team found with id: {}", team_id))?;
+        Ok(found_value)
+    }
+
+    fn get_team_label(&self, team_id: &String) -> anyhow::Result<String> {
+        let teams_value = self
+            .get("teams")
+            .with_context(|| "Unable to read teams from store".to_string())?
+            .clone();
+        let teams_store = serde_json::from_value::<HashMap<String, Team>>(teams_value)
+            .with_context(|| "Failed to deserialize teams".to_string())?;
+
+        let found_value = teams_store
+            .get(team_id)
+            .with_context(|| format!("No teams found with id: {}", team_id))
+            .map(|team| team.label.clone())?;
+        Ok(found_value)
+    }
+
+    fn get_team_list(&self) -> anyhow::Result<Vec<Team>> {
+        let teams_value = self
+            .get("teams")
+            .with_context(|| "Unable to read teams from store".to_string())?
+            .clone();
+        let teams_store = serde_json::from_value::<HashMap<String, Team>>(teams_value)
+            .with_context(|| "Failed to deserialize teams".to_string())?;
+
+        Ok(teams_store.values().cloned().collect())
     }
 
     fn get_vehicle_list(&self) -> anyhow::Result<Vec<Vehicle>> {
@@ -455,6 +500,34 @@ impl FirefightDataManager for LocalStore {
         Ok(staff_id)
     }
 
+    fn create_team(&mut self, mut team: Team) -> anyhow::Result<String> {
+        let default_teams = serde_json::json!({});
+        let teams_value = self
+            .get("teams")
+            .with_context(|| "Unable to read teams from store".to_string())
+            .unwrap_or_else(|_| &default_teams)
+            .clone();
+        let mut teams_store = serde_json::from_value::<HashMap<String, Team>>(teams_value)
+            .with_context(|| "Failed to deserialize teams".to_string())?;
+
+        let team_id = uuid::Uuid::new_v4().to_string();
+        team.internal_id = team_id.clone();
+        teams_store.insert(team_id.clone(), team);
+
+        self.insert(String::from("teams"), serde_json::json!(teams_store))
+            .with_context(|| {
+                format!(
+                    "Failed to create teams {} with value {:?}",
+                    &team_id,
+                    teams_store.get(&team_id)
+                )
+            })?;
+        self.save()
+            .with_context(|| "Failed to save store while creating team".to_string())?;
+
+        Ok(team_id)
+    }
+
     fn create_vehicle(&mut self, mut vehicle: Vehicle) -> anyhow::Result<String> {
         let vehicles_value = self
             .get("vehicles")
@@ -631,6 +704,30 @@ impl FirefightDataManager for LocalStore {
             })?;
         self.save()
             .with_context(|| "Failed to save store while updating staff".to_string())?;
+
+        Ok(prev_staff)
+    }
+
+    fn update_team(&mut self, team_id: &String, team: Team) -> anyhow::Result<Option<Team>> {
+        let teams_value = self
+            .get("teams")
+            .with_context(|| "Unable to read teams from store".to_string())?
+            .clone();
+        let mut teams_store = serde_json::from_value::<HashMap<String, Team>>(teams_value)
+            .with_context(|| "Failed to deserialize teams".to_string())?;
+
+        let prev_staff = teams_store.insert(team_id.clone(), team);
+
+        self.insert(String::from("teams"), serde_json::json!(teams_store))
+            .with_context(|| {
+                format!(
+                    "Failed to update teams {} with value {:?}",
+                    team_id,
+                    teams_store.get(team_id).unwrap()
+                )
+            })?;
+        self.save()
+            .with_context(|| "Failed to save store while updating team".to_string())?;
 
         Ok(prev_staff)
     }
@@ -815,6 +912,60 @@ impl FirefightDataManager for LocalStore {
         Ok(())
     }
 
+    fn delete_team(&mut self, team_id: &String) -> anyhow::Result<()> {
+        let teams_value = self
+            .get("teams")
+            .with_context(|| "Unable to read teams from store".to_string())?
+            .clone();
+        let mut teams_store = serde_json::from_value::<HashMap<String, Team>>(teams_value)
+            .with_context(|| "Failed to deserialize teams".to_string())?;
+
+        let removed_entry = teams_store.remove(team_id);
+        self.insert(String::from("teams"), serde_json::json!(teams_store))
+            .with_context(|| format!("Failed to delete team {}", team_id))?;
+
+        if let Some(removed_team) = removed_entry {
+            if removed_team.state == TeamState::Dispatched {
+                // Update active occurrence
+                let active_occurrence_value = self
+                    .get("active_occurrences")
+                    .with_context(|| "Unable to read active occurrences from store".to_string())?
+                    .clone();
+                let mut active_occurrence_store = serde_json::from_value::<
+                    HashMap<String, ActiveOccurrence>,
+                >(active_occurrence_value)
+                .with_context(|| "Failed to deserialize active occurrences".to_string())?;
+
+                if let Some(active_occurrence) = active_occurrence_store
+                    .values_mut()
+                    .find(|active_occurrence| active_occurrence.team_ids.contains(&team_id))
+                {
+                    let team_idx = active_occurrence
+                        .team_ids
+                        .iter()
+                        .position(|id| id == team_id);
+                    active_occurrence.team_ids.swap_remove(team_idx.unwrap());
+                }
+
+                self.insert(
+                    String::from("active_occurrences"),
+                    serde_json::json!(active_occurrence_store),
+                )
+                .with_context(|| {
+                    format!(
+                        "Failed to update active occurrences with value {:?}",
+                        active_occurrence_store
+                    )
+                })?;
+            }
+        }
+
+        self.save()
+            .with_context(|| "Failed to save store while deleting team".to_string())?;
+
+        Ok(())
+    }
+
     fn delete_vehicle(&mut self, vehicle_id: &String) -> anyhow::Result<()> {
         let vehicles_value = self
             .get("vehicles")
@@ -872,7 +1023,11 @@ impl FirefightDataManager for LocalStore {
         Ok(())
     }
 
-    fn set_staff_shift(&mut self, available_staff: Vec<String>) -> anyhow::Result<()> {
+    fn set_staff_shift(
+        &mut self,
+        available_staff: Vec<String>,
+        team_allocations: HashMap<String, Vec<String>>,
+    ) -> anyhow::Result<()> {
         let staff_value = self
             .get("staff")
             .with_context(|| "Unable to read staff from store".to_string())?
@@ -892,6 +1047,29 @@ impl FirefightDataManager for LocalStore {
 
         self.insert(String::from("staff"), serde_json::json!(staff_store))
             .with_context(|| format!("Failed to update staff with value {:?}", staff_store))?;
+
+        let teams_value = self
+            .get("teams")
+            .with_context(|| "Unable to read teams from store".to_string())?
+            .clone();
+        let mut teams_store = serde_json::from_value::<HashMap<String, Team>>(teams_value)
+            .with_context(|| "Failed to deserialize teams".to_string())?;
+
+        teams_store.iter_mut().for_each(|(_, team)| {
+            if (team.state == TeamState::Available) || (team.state == TeamState::Unavailable) {
+                if team_allocations.contains_key(&team.internal_id) {
+                    team.state = TeamState::Available;
+                    team.member_ids = team_allocations.get(&team.internal_id).unwrap().clone();
+                } else {
+                    team.state = TeamState::Unavailable;
+                    team.member_ids = vec![];
+                }
+            }
+        });
+
+        self.insert(String::from("teams"), serde_json::json!(teams_store))
+            .with_context(|| format!("Failed to update teams with value {:?}", teams_store))?;
+
         self.save()
             .with_context(|| "Failed to save store while setting staff shift".to_string())?;
 

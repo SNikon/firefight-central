@@ -8,11 +8,14 @@ import { ApplicationHeader } from './_components/ApplicationHeader'
 import { ManageVehicles } from './ManageVehicles'
 import { Overview } from './Overview'
 import { ManageStaff } from './ManageStaff'
+import { ManageTeams } from './ManageTeams'
+import { Management } from './Management'
 
 const useUpdateOnLaunch = () => {
 	useEffect(() => {
-		updater.checkUpdate()
-			.then(async update => {
+		updater
+			.checkUpdate()
+			.then(async (update) => {
 				if (update.shouldUpdate) {
 					await updater.installUpdate()
 					relaunch().catch(console.error)
@@ -27,11 +30,15 @@ export const Main = () => {
 	useUpdateOnLaunch()
 	const viewMode = useObservable(activeView$)
 
-	return <div className='w-dvw h-dvh bg-background overflow-hidden flex flex-col select-none'>
-		<ApplicationHeader />
+	return (
+		<div className="w-dvw h-dvh bg-background overflow-hidden flex flex-col select-none">
+			<ApplicationHeader />
 
-		{viewMode === View.Overview && <Overview />}
-		{viewMode === View.ManageStaff && <ManageStaff />}
-		{viewMode === View.ManageVehicles && <ManageVehicles />}
-	</div>
+			{viewMode === View.Overview && <Overview />}
+			{viewMode === View.ManageStaff && <ManageStaff />}
+			{viewMode === View.ManageTeams && <ManageTeams />}
+			{viewMode === View.ManageVehicles && <ManageVehicles />}
+			{viewMode === View.Management && <Management />}
+		</div>
+	)
 }

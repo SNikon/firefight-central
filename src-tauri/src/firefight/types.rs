@@ -39,7 +39,7 @@ pub enum StaffPermission {
     All,
     Shift,
     Own,
-    None
+    None,
 }
 
 fn default_permission() -> StaffPermission {
@@ -68,6 +68,24 @@ pub struct Staff {
     #[serde(default = "default_rank")]
     pub rank: StaffRank,
     pub state: StaffState,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum TeamState {
+    Available,
+    Dispatched,
+    Inactive,
+    Unavailable,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Team {
+    pub internal_id: String,
+    pub label: String,
+    pub member_ids: Vec<String>,
+    pub state: TeamState,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -107,6 +125,10 @@ pub struct Vehicle {
     pub state: VehicleState,
 }
 
+fn default_team_ids() -> Vec<String> {
+    vec![]
+}
+
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ActiveOccurrence {
@@ -119,10 +141,16 @@ pub struct ActiveOccurrence {
     pub occurrence_id: String,
     pub reference_point: Option<String>,
     pub staff_ids: Vec<String>,
+    #[serde(default="default_team_ids")]
+    pub team_ids: Vec<String>,
     #[serde(default)]
     pub vehicle_assignment_map: HashMap<String, Vec<String>>,
     pub vehicle_ids: Vec<String>,
     pub vmer_siv: Option<bool>,
+}
+
+pub fn default_teams() -> HashMap<String, Team> {
+    HashMap::new()
 }
 
 #[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
@@ -131,6 +159,8 @@ pub struct DataStore {
     pub active_occurrences: HashMap<String, ActiveOccurrence>,
     pub occurrences: HashMap<String, Occurrence>,
     pub staff: HashMap<String, Staff>,
+    #[serde(default="default_teams")]
+    pub teams: HashMap<String, Team>,
     pub vehicles: HashMap<String, Vehicle>,
 }
 
@@ -153,6 +183,9 @@ pub trait FirefightDataManager {
     fn get_staff(&self, staff_id: &String) -> anyhow::Result<Staff>;
     fn get_staff_label(&self, staff_id: &String) -> anyhow::Result<String>;
     fn get_staff_list(&self) -> anyhow::Result<Vec<Staff>>;
+    fn get_team(&self, team_id: &String) -> anyhow::Result<Team>;
+    fn get_team_label(&self, team_id: &String) -> anyhow::Result<String>;
+    fn get_team_list(&self) -> anyhow::Result<Vec<Team>>;
     fn get_vehicle(&self, vehicle_id: &String) -> anyhow::Result<Vehicle>;
     fn get_vehicle_capacity(&self, vehicle_id: &String) -> anyhow::Result<Option<u8>>;
     fn get_vehicle_label(&self, vehicle_id: &String) -> anyhow::Result<String>;
@@ -161,6 +194,7 @@ pub trait FirefightDataManager {
     fn create_active_occurrence(&mut self, occurrence: ActiveOccurrence) -> anyhow::Result<String>;
     fn create_occurrence(&mut self, occurrence: Occurrence) -> anyhow::Result<String>;
     fn create_staff(&mut self, staff: Staff) -> anyhow::Result<String>;
+    fn create_team(&mut self, team: Team) -> anyhow::Result<String>;
     fn create_vehicle(&mut self, vehicle: Vehicle) -> anyhow::Result<String>;
 
     fn update_active_occurrence(
@@ -174,6 +208,7 @@ pub trait FirefightDataManager {
         occurrence: Occurrence,
     ) -> anyhow::Result<Option<Occurrence>>;
     fn update_staff(&mut self, staff_id: &String, staff: Staff) -> anyhow::Result<Option<Staff>>;
+    fn update_team(&mut self, team_id: &String, team: Team) -> anyhow::Result<Option<Team>>;
     fn update_vehicle(
         &mut self,
         vehicle_id: &String,
@@ -183,7 +218,8 @@ pub trait FirefightDataManager {
     fn delete_active_occurrence(&mut self, active_occurrence_id: &String) -> anyhow::Result<()>;
     fn delete_occurrence(&mut self, occurrence_id: &String) -> anyhow::Result<()>;
     fn delete_staff(&mut self, staff_id: &String) -> anyhow::Result<()>;
+    fn delete_team(&mut self, team_id: &String) -> anyhow::Result<()>;
     fn delete_vehicle(&mut self, vehicle_id: &String) -> anyhow::Result<()>;
 
-    fn set_staff_shift(&mut self, available_staff: Vec<String>) -> anyhow::Result<()>;
+    fn set_staff_shift(&mut self, available_staff: Vec<String>, team_allocations: HashMap<String, Vec<String>>) -> anyhow::Result<()>;
 }

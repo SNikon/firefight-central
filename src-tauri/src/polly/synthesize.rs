@@ -10,6 +10,7 @@ pub enum Synthesizable {
     Pattern(String),
     Raw(String),
     Staff(String),
+    Team(String),
     Vehicle(String),
 }
 
@@ -29,6 +30,7 @@ impl Synthesizable {
                     .replace("S", "</say-as><phoneme alphabet=\"ipa\" ph=\"ˈɛs\">S</phoneme><say-as interpret-as=\"spell-out\">"),
                 SPEECH_END),
             Synthesizable::Raw(text) => text.clone(),
+            Synthesizable::Team(label) => format!("{}{}{}", SLOW_SPEECH, label, SPEECH_END),
             Synthesizable::Staff(label) => format!("{}{}{}", SLOW_SPEECH, label.trim_start_matches('0'), SPEECH_END),
         }
     }

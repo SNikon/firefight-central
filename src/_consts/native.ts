@@ -82,3 +82,17 @@ export type Staff = {
 	rank: StaffRank
 	state: StaffState
 }
+
+export enum TeamState {
+	Available = 'available',
+	Dispatched = 'dispatched',
+	Inactive = 'inactive',
+	Unavailable = 'unavailable'
+}
+
+export type Team = {
+	internalId: string
+	label: string
+	memberIds: string[]
+	state: TeamState
+}

@@ -126,6 +126,42 @@ pub async fn create_staff(
 }
 
 #[tauri::command]
+pub async fn create_team(
+    app_handle: AppHandle,
+    state: State<'_, Mutex<LocalStore>>,
+    team: Team,
+) -> Result<(), String> {
+    let mut state_mutex = state.lock().into_future().await;
+    let state_mutex_ref = state_mutex.borrow_mut();
+    let state = state_mutex_ref.deref_mut();
+
+    let audible_team_label = team.label.clone();
+    let team_id = state.create_team(team);
+    if team_id.is_err() {
+        return Err(team_id.unwrap_err().to_string());
+    }
+
+    let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
+
+    let audio_synthesizer = polly::client::create_polly_client().await;
+    let audio_resouce = polly::synthesize::synthesize(
+        &audio_synthesizer,
+        &polly::synthesize::Synthesizable::Team(audible_team_label),
+    )
+    .await;
+    if audio_resouce.is_err() {
+        return Err(audio_resouce.unwrap_err().to_string());
+    }
+    let _ = audio::put_audio_cache(
+        &app_handle,
+        &team_id.unwrap(),
+        audio_resouce.unwrap().to_vec().borrow_mut(),
+    );
+
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn create_vehicle(
     app_handle: AppHandle,
     state: State<'_, Mutex<LocalStore>>,
@@ -261,6 +297,47 @@ pub async fn update_staff(
     Ok(())
 }
 
+
+#[tauri::command]
+pub async fn update_team(
+    app_handle: AppHandle,
+    state: State<'_, Mutex<LocalStore>>,
+    team: Team,
+) -> Result<(), String> {
+    let mut state_mutex = state.lock().into_future().await;
+    let state_mutex_ref = state_mutex.borrow_mut();
+    let state = state_mutex_ref.deref_mut();
+
+    let audible_team_label = team.label.clone();
+    let update_result = state.update_team(&team.internal_id.clone(), team);
+    if let Err(update_error) = update_result {
+        return Err(update_error.to_string());
+    }
+
+    let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
+
+    if let Ok(Some(previous_team)) = update_result {
+        if audible_team_label != previous_team.label {
+            let audio_synthesizer = polly::client::create_polly_client().await;
+            let audio_resouce = polly::synthesize::synthesize(
+                &audio_synthesizer,
+                &polly::synthesize::Synthesizable::Staff(audible_team_label),
+            )
+            .await;
+            if audio_resouce.is_err() {
+                return Err(audio_resouce.unwrap_err().to_string());
+            }
+            let _ = audio::put_audio_cache(
+                &app_handle,
+                &previous_team.internal_id,
+                audio_resouce.unwrap().to_vec().borrow_mut(),
+            );
+        }
+    }
+
+    Ok(())
+}
+
 #[tauri::command]
 pub async fn update_vehicle(
     app_handle: AppHandle,
@@ -363,6 +440,27 @@ pub async fn delete_staff(
 }
 
 #[tauri::command]
+pub async fn delete_team(
+    app_handle: AppHandle,
+    state: State<'_, Mutex<LocalStore>>,
+    team_id: String,
+) -> Result<(), String> {
+    let mut state_mutex = state.lock().into_future().await;
+    let state_mutex_ref = state_mutex.borrow_mut();
+    let state = state_mutex_ref.deref_mut();
+
+    let delete_result = state.delete_team(&team_id);
+    if let Err(delete_error) = delete_result {
+        return Err(delete_error.to_string());
+    }
+
+    let _ = app_handle.emit_all(STATE_UPDATED, get_data_store(state));
+    let _ = audio::delete_audio_cache(&app_handle, &team_id);
+
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn delete_vehicle(
     app_handle: AppHandle,
     state: State<'_, Mutex<LocalStore>>,
@@ -388,12 +486,13 @@ pub async fn set_staff_shift(
     app_handle: AppHandle,
     state: State<'_, Mutex<LocalStore>>,
     available_staff: Vec<String>,
+    team_allocations: HashMap<String, Vec<String>>,
 ) -> Result<(), String> {
     let mut state_mutex = state.lock().into_future().await;
     let state_mutex_ref = state_mutex.borrow_mut();
     let state = state_mutex_ref.deref_mut();
 
-    let update_result = state.set_staff_shift(available_staff);
+    let update_result = state.set_staff_shift(available_staff, team_allocations);
     if let Err(update_error) = update_result {
         return Err(update_error.to_string());
     }

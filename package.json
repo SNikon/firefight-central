@@ -1,7 +1,7 @@
 {
   "name": "torii-firefighter",
   "private": true,
-  "version": "1.8.0",
+  "version": "1.10.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,7 +13,10 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^1.5.3",
+    "ag-grid-community": "^32.1.0",
+    "ag-grid-react": "^32.1.0",
     "classnames": "^2.5.1",
+    "prettier": "^3.3.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-use": "^17.5.0",

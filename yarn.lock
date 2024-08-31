@@ -1031,6 +1031,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ag-charts-types@npm:10.1.0":
+  version: 10.1.0
+  resolution: "ag-charts-types@npm:10.1.0"
+  checksum: d557036b22fbf88d79811f5383ae8dc169bebf2cb6104bfc482cc0b7c5c38e0449a34c164ea5cc4f69561995733023ad9db340ed7eb08ac9257ee73d61d8fde7
+  languageName: node
+  linkType: hard
+
+"ag-grid-community@npm:32.1.0, ag-grid-community@npm:^32.1.0":
+  version: 32.1.0
+  resolution: "ag-grid-community@npm:32.1.0"
+  dependencies:
+    ag-charts-types: "npm:10.1.0"
+  checksum: 14e01a7af22b6cbae3ac559e3d66bd06baf1e7a786040f5680302d6e41a91e40dc51b79ef5c451874bcf8047279d0d24c03045f3f39da1199d02618803b2288a
+  languageName: node
+  linkType: hard
+
+"ag-grid-react@npm:^32.1.0":
+  version: 32.1.0
+  resolution: "ag-grid-react@npm:32.1.0"
+  dependencies:
+    ag-grid-community: "npm:32.1.0"
+    prop-types: "npm:^15.8.1"
+  peerDependencies:
+    react: ^16.3.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.3.0 || ^17.0.0 || ^18.0.0
+  checksum: c8f8d6bee067423445c97750d5d3f12df2a51e9997ba8249d28f0cf4b47da5ab57caf5c758247ea2ff1dcdb33d8023d8feb13b2770c06ecad23e6c19970ee6ac
+  languageName: node
+  linkType: hard
+
 "agent-base@npm:^7.0.2, agent-base@npm:^7.1.0":
   version: 7.1.0
   resolution: "agent-base@npm:7.1.0"
@@ -3574,6 +3603,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prettier@npm:^3.3.3":
+  version: 3.3.3
+  resolution: "prettier@npm:3.3.3"
+  bin:
+    prettier: bin/prettier.cjs
+  checksum: b85828b08e7505716324e4245549b9205c0cacb25342a030ba8885aba2039a115dbcf75a0b7ca3b37bc9d101ee61fab8113fc69ca3359f2a226f1ecc07ad2e26
+  languageName: node
+  linkType: hard
+
 "proc-log@npm:^3.0.0":
   version: 3.0.0
   resolution: "proc-log@npm:3.0.0"
@@ -4388,12 +4426,15 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^6.20.0"
     "@typescript-eslint/parser": "npm:^6.20.0"
     "@vitejs/plugin-react-swc": "npm:^3.6.0"
+    ag-grid-community: "npm:^32.1.0"
+    ag-grid-react: "npm:^32.1.0"
     autoprefixer: "npm:^10.4.17"
     classnames: "npm:^2.5.1"
     eslint: "npm:^8.56.0"
     eslint-plugin-import: "npm:^2.29.1"
     eslint-plugin-react: "npm:^7.33.2"
     postcss: "npm:^8.4.33"
+    prettier: "npm:^3.3.3"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-use: "npm:^17.5.0"
