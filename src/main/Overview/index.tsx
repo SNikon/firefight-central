@@ -18,8 +18,11 @@ import { VehiclePanel } from '../_components/VehiclePanel'
 import { ActiveOccurrenceWizard } from '../_components/ActiveOccurrenceWizard'
 import { openFullViewPanel } from '../../_utils/openFullViewPanel'
 import { ShiftWizard } from '../_components/ShiftWizard'
+import { useLanguageStore } from '../../_state/lang'
 
 export const Overview = () => {
+	const { languageData } = useLanguageStore()
+
 	const activeOccurrenceMap = useObservable(activeOccurrences$, {})
 	const vehicleMap = useObservable(vehicles$, {})
 	const staffMap = useObservable(staff$, {})
@@ -64,7 +67,7 @@ export const Overview = () => {
 
 		const isDispatched = staff.state === StaffState.Dispatched
 		if (isDispatched) {
-			const occurrenceId = sortedOccurrences.find(occurrence => occurrence.staffIds.includes(id))?.internalId
+			const occurrenceId = sortedOccurrences.find((occurrence) => occurrence.staffIds.includes(id))?.internalId
 
 			if (occurrenceId) {
 				setSelectedId(occurrenceId)
@@ -82,7 +85,7 @@ export const Overview = () => {
 
 		const isDispatched = vehicle.state === VehicleState.Dispatched
 		if (isDispatched) {
-			const occurrenceId = sortedOccurrences.find(occurrence => occurrence.vehicleIds.includes(id))?.internalId
+			const occurrenceId = sortedOccurrences.find((occurrence) => occurrence.vehicleIds.includes(id))?.internalId
 
 			if (occurrenceId) {
 				setSelectedId(occurrenceId)
@@ -96,19 +99,19 @@ export const Overview = () => {
 	}
 
 	return (
-		<div className='bg-background text-primary flex flex-col overflow-hidden'>
+		<div className="bg-background text-primary flex flex-col overflow-hidden">
 			<Header>
 				<HeaderSection>
-					<Button onClick={setShowDefineShift.bind(null, true)}>Definir turno</Button>
-					<Button onClick={openFullViewPanel}>Painel de recursos</Button>
+					<Button onClick={setShowDefineShift.bind(null, true)}>{languageData['overview.manage_shift']}</Button>
+					<Button onClick={openFullViewPanel}>{languageData['overview.resource_panel']}</Button>
 				</HeaderSection>
 
-				<Button onClick={setShowCreateOccurrence.bind(null, true)}>Nova ocorrência</Button>
+				<Button onClick={setShowCreateOccurrence.bind(null, true)}>{languageData['overview.create_occurrence']}</Button>
 			</Header>
 
-			<Scrollable className='pb-10'>
-				<div className='w-full px-5 pt-5 h-max gap-5 grid sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5'>
-					{sortedOccurrences.map(occurrence => (
+			<Scrollable className="pb-10">
+				<div className="w-full px-5 pt-5 h-max gap-5 grid sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5">
+					{sortedOccurrences.map((occurrence) => (
 						<ActiveOccurrenceCard
 							key={occurrence.internalId}
 							creationTime={occurrence.creationTime}
@@ -121,12 +124,10 @@ export const Overview = () => {
 					))}
 				</div>
 
-				<h2 className='px-5 my-5 text-actionHighlight font-extrabold text-2xl'>
-					Veículos
-				</h2>
+				<h2 className="px-5 my-5 text-actionHighlight font-extrabold text-2xl">{languageData['terms.vehicles']}</h2>
 
 				<CardGrid small>
-					{sortedVehicles.map(vehicle => (
+					{sortedVehicles.map((vehicle) => (
 						<VehicleCard
 							key={vehicle.internalId}
 							disabled={vehicle.state !== VehicleState.Dispatched}
@@ -139,12 +140,10 @@ export const Overview = () => {
 					))}
 				</CardGrid>
 
-				<h2 className='px-5 my-5 text-actionHighlight font-extrabold text-2xl'>
-					Pessoal
-				</h2>
+				<h2 className="px-5 my-5 text-actionHighlight font-extrabold text-2xl">{languageData['terms.staff']}</h2>
 
 				<CardGrid small>
-					{sortedStaff.map(staff => (
+					{sortedStaff.map((staff) => (
 						<StaffCard
 							key={staff.internalId}
 							disabled={staff.state !== StaffState.Dispatched}
@@ -159,11 +158,31 @@ export const Overview = () => {
 				</CardGrid>
 			</Scrollable>
 
-			{showCreateOccurrence && <Modal><ActiveOccurrenceWizard onClose={setShowCreateOccurrence.bind(null, false)} /></Modal>}
-			{showDefineShift && <Modal><ShiftWizard onClose={setShowDefineShift.bind(null, false)} /></Modal>}
-			{showViewOccurrence && <Modal><OccurrencePanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewOccurrence)} /></Modal>}
-			{showViewStaff && <Modal><StaffPanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewStaff)} /></Modal>}
-			{showViewVehicle && <Modal><VehiclePanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewVehicle)} /></Modal>}
+			{showCreateOccurrence && (
+				<Modal>
+					<ActiveOccurrenceWizard onClose={setShowCreateOccurrence.bind(null, false)} />
+				</Modal>
+			)}
+			{showDefineShift && (
+				<Modal>
+					<ShiftWizard onClose={setShowDefineShift.bind(null, false)} />
+				</Modal>
+			)}
+			{showViewOccurrence && (
+				<Modal>
+					<OccurrencePanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewOccurrence)} />
+				</Modal>
+			)}
+			{showViewStaff && (
+				<Modal>
+					<StaffPanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewStaff)} />
+				</Modal>
+			)}
+			{showViewVehicle && (
+				<Modal>
+					<VehiclePanel internalId={selectedId} onClose={onClosePanel.bind(null, setShowViewVehicle)} />
+				</Modal>
+			)}
 		</div>
 	)
 }

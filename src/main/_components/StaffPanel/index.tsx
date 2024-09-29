@@ -1,4 +1,4 @@
-import { type FunctionComponent, useEffect, useState } from 'react'
+import { type FunctionComponent, useEffect, useMemo, useState } from 'react'
 import { useObservable } from 'react-use'
 import { type Staff, StaffState, StaffRank, StaffPermission } from '../../../_consts/native'
 import { createStaff$, deleteStaff$, staff$, updateStaff$ } from '../../../_state/store'
@@ -7,40 +7,15 @@ import { useEscapeKey } from '../../../_utils/useEscapeKey'
 import { staffStateToLocale } from '../../../_utils/staffStateToLocale'
 import { staffRankToLocale } from '../../../_utils/staffRankToLocale'
 import { staffPermissionToLocale } from '../../../_utils/permissionToLocale'
-
-const stateOptions = [
-	StaffState.Available,
-	StaffState.Inactive,
-	StaffState.SickLeave,
-	StaffState.Unavailable
-].map(value => ({ value: value, label: staffStateToLocale(value) }))
-
-const rankOptions = [
-	StaffRank.Unknown,
-	StaffRank.Rank8,
-	StaffRank.Rank7,
-	StaffRank.Rank6,
-	StaffRank.Rank5,
-	StaffRank.Rank4,
-	StaffRank.Rank3,
-	StaffRank.Rank2,
-	StaffRank.Rank1,
-	StaffRank.Rank0
-].map(value => ({ value: value, label: staffRankToLocale(value) }))
-
-const permissionOptions = [
-	StaffPermission.All,
-	StaffPermission.Shift,
-	StaffPermission.Own,
-	StaffPermission.None
-].map(value => ({ value: value, label: staffPermissionToLocale(value) }))
+import { useLanguageStore } from '../../../_state/lang'
 
 type StaffPanelProps = {
-	internalId: string | undefined
-	onClose: () => void
+  internalId: string | undefined
+  onClose: () => void
 }
 
 export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onClose }) => {
+	const { languageData } = useLanguageStore()
 	const staffMap = useObservable(staff$, {})
 
 	const [staffId, setStaffId] = useState('')
@@ -76,7 +51,9 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 	const [staffImage, setStaffImage] = useState('')
 	const onStaffImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0]
-		if (!file) { return }
+		if (!file) {
+			return
+		}
 
 		const reader = new FileReader()
 		reader.onload = () => {
@@ -84,7 +61,7 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 		}
 		reader.readAsDataURL(file)
 	}
-	
+
 	const canSave = staffName.trim() && staffId.trim()
 
 	useEffect(() => {
@@ -131,94 +108,144 @@ export const StaffPanel: FunctionComponent<StaffPanelProps> = ({ internalId, onC
 
 	useEscapeKey(onClose)
 
-	return <div className='absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full z-10 select-none'>
-		<div className='absolute top-0 left-0 w-full h-full backdrop-blur-md' />
+	const stateOptions = useMemo(
+		() =>
+			[StaffState.Available, StaffState.Inactive, StaffState.SickLeave, StaffState.Unavailable].map((value) => ({
+				value: value,
+				label: staffStateToLocale(value, languageData)
+			})),
+		[languageData]
+	)
 
-		<div className='flex flex-col bg-[#000] text-primary p-5 rounded-xl z-10 w-full max-w-2xl max-h-[calc(100vh-50px)] overflow-y-auto'>
-			<div className='text-2xl font-extrabold'>
-				{internalId ? 'Gerir' : 'Adicionar'} bombeiro
-			</div>
+	const rankOptions = useMemo(
+		() =>
+			[
+				StaffRank.Unknown,
+				StaffRank.Rank8,
+				StaffRank.Rank7,
+				StaffRank.Rank6,
+				StaffRank.Rank5,
+				StaffRank.Rank4,
+				StaffRank.Rank3,
+				StaffRank.Rank2,
+				StaffRank.Rank1,
+				StaffRank.Rank0
+			].map((value) => ({ value: value, label: staffRankToLocale(value, languageData) })),
+		[languageData]
+	)
 
-			<label className='mt-5 text-action'>Identificador</label>
-			<input
-				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
-				onChange={onStaffIdChange}
-				placeholder='Identificador'
-				value={staffId}
-			/>
+	const permissionOptions = useMemo(
+		() =>
+			[StaffPermission.All, StaffPermission.Shift, StaffPermission.Own, StaffPermission.None].map((value) => ({
+				value: value,
+				label: staffPermissionToLocale(value, languageData)
+			})),
+		[languageData]
+	)
 
-			<label className='mt-5 text-action'>Nome</label>
-			<input
-				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
-				onChange={onStaffNameChange}
-				placeholder='Nome'
-				value={staffName}
-			/>
+	return (
+		<div className="absolute top-0 left-0 flex flex-col items-center justify-center w-full h-full z-10 select-none">
+			<div className="absolute top-0 left-0 w-full h-full backdrop-blur-md" />
 
-			
-			<label className='mt-5 text-action'>Número Mecanográfico</label>
-			<input
-				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
-				onChange={onStaffNationalIdChange}
-				placeholder='Número Mecanográfico'
-				value={staffNationalId}
-			/>
-
-			<label className='mt-5 text-action'>Posto</label>
-			<select
-				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
-				onChange={onStaffRankChange}
-				value={staffRank}
-			>
-				{rankOptions.map(option => (
-					<option key={option.value} value={option.value}>{option.label}</option>
-				))}
-			</select>
-
-			<label className='mt-5 text-action'>Estado</label>
-			<select
-				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
-				disabled={staffState === StaffState.Dispatched}
-				onChange={onStaffStateChange}
-				value={staffState}
-			>
-				{stateOptions.map(option => (
-					<option key={option.value} value={option.value}>{option.label}</option>
-				))}
-			</select>
-
-			<label className='mt-5 text-action'>Imagem</label>
-			{staffImage && <div className='flex flex-row justify-center'>
-				<img className='max-h-[150px] p-2 rounded border border-[#000]/50' src={staffImage} />
-			</div>}
-			<input
-				accept='image/*'
-				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
-				onChange={onStaffImageChange}
-				type='file'
-			/>
-
-			<label className='mt-5 text-action'>Permissões de acesso</label>
-			<select
-				className='bg-background text-action mt-1 p-2 rounded border border-[#000]/50'
-				onChange={onStaffPermissionChange}
-				value={staffPermission}
-			>
-				{permissionOptions.map(option => (
-					<option key={option.value} value={option.value}>{option.label}</option>
-				))}
-			</select>
-
-			<div className='flex flex-row justify-between mt-10'>
-				<div className='space-x-5'>
-					{internalId && <Button danger onClick={onDelete}>Eliminar</Button>}
+			<div className="flex flex-col bg-[#000] text-primary p-5 rounded-xl z-10 w-full max-w-2xl max-h-[calc(100vh-50px)] overflow-y-auto">
+				<div className="text-2xl font-extrabold">
+					{languageData[internalId ? 'manage_staff.edit_staff' : 'manage_staff.add_staff']}
 				</div>
 
-				<div className='space-x-5'>
-					<Button onClick={onClose}>Cancelar</Button>
-					<Button disabled={!canSave} onClick={onSave}>{internalId ? 'Gravar' : 'Criar'}</Button>
+				<label className="mt-5 text-action">{languageData['manage_staff.form.name']}</label>
+				<input
+					className="bg-background text-action mt-1 p-2 rounded border border-[#000]/50"
+					onChange={onStaffIdChange}
+					placeholder={languageData['manage_staff.form.name_placeholder']}
+					value={staffId}
+				/>
+
+				<label className="mt-5 text-action">{languageData['manage_staff.form.name']}</label>
+				<input
+					className="bg-background text-action mt-1 p-2 rounded border border-[#000]/50"
+					onChange={onStaffNameChange}
+					placeholder={languageData['manage_staff.form.name_placeholder']}
+					value={staffName}
+				/>
+
+				<label className="mt-5 text-action">{languageData['manage_staff.form.national_id']}</label>
+				<input
+					className="bg-background text-action mt-1 p-2 rounded border border-[#000]/50"
+					onChange={onStaffNationalIdChange}
+					placeholder={languageData['manage_staff.form.national_id_placeholder']}
+					value={staffNationalId}
+				/>
+
+				<label className="mt-5 text-action">{languageData['manage_staff.form.rank']}</label>
+				<select
+					className="bg-background text-action mt-1 p-2 rounded border border-[#000]/50"
+					onChange={onStaffRankChange}
+					value={staffRank}
+				>
+					{rankOptions.map((option) => (
+						<option key={option.value} value={option.value}>
+							{option.label}
+						</option>
+					))}
+				</select>
+
+				<label className="mt-5 text-action">{languageData['manage_staff.form.state']}</label>
+				<select
+					className="bg-background text-action mt-1 p-2 rounded border border-[#000]/50"
+					disabled={staffState === StaffState.Dispatched}
+					onChange={onStaffStateChange}
+					value={staffState}
+				>
+					{stateOptions.map((option) => (
+						<option key={option.value} value={option.value}>
+							{option.label}
+						</option>
+					))}
+				</select>
+
+				<label className="mt-5 text-action">{languageData['manage_staff.form.image']}</label>
+				{staffImage && (
+					<div className="flex flex-row justify-center">
+						<img className="max-h-[150px] p-2 rounded border border-[#000]/50" src={staffImage} />
+					</div>
+				)}
+				<input
+					accept="image/*"
+					className="bg-background text-action mt-1 p-2 rounded border border-[#000]/50"
+					onChange={onStaffImageChange}
+					type="file"
+				/>
+
+				<label className="mt-5 text-action">{languageData['manage_staff.form.permission']}</label>
+				<select
+					className="bg-background text-action mt-1 p-2 rounded border border-[#000]/50"
+					onChange={onStaffPermissionChange}
+					value={staffPermission}
+				>
+					{permissionOptions.map((option) => (
+						<option key={option.value} value={option.value}>
+							{option.label}
+						</option>
+					))}
+				</select>
+
+				<div className="flex flex-row justify-between mt-10">
+					<div className="space-x-5">
+						{internalId && (
+							<Button danger onClick={onDelete}>
+								{languageData['terms.remove']}
+							</Button>
+						)}
+					</div>
+
+					<div className="space-x-5">
+						<Button onClick={onClose}>{languageData['terms.cancel']}</Button>
+						<Button disabled={!canSave} onClick={onSave}>
+							{languageData[internalId ? 'terms.save' : 'terms.create']}
+						</Button>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	)
 }

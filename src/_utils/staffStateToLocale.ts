@@ -1,34 +1,35 @@
 import { StaffState } from '../_consts/native'
+import { LanguagePack } from '../_state/lang'
 
-export const staffStateToLocale = (state: StaffState): string => {
+export const staffStateToLocale = (state: StaffState, languageData: LanguagePack): string => {
 	switch (state) {
 	case StaffState.Available:
-		return 'Disponível'
+		return languageData['staff_state.available.long']
 	case StaffState.Dispatched:
-		return 'Em Serviço'
+		return languageData['staff_state.dispatched.long']
 	case StaffState.Inactive:
-		return 'Inativo'
+		return languageData['staff_state.inactive.long']
 	case StaffState.SickLeave:
-		return 'Baixa Médica'
+		return languageData['staff_state.sick_leave.long']
 	case StaffState.Unavailable:
-		return 'Fora de Serviço'
+		return languageData['staff_state.unavailable.long']
 	default:
 		return ''
 	}
 }
 
-export const staffStateToShortLocale = (state: StaffState): string => {
+export const staffStateToShortLocale = (state: StaffState, languageData: LanguagePack): string => {
 	switch (state) {
 	case StaffState.Available:
-		return 'Disp'
+		return languageData['staff_state.available.short']
 	case StaffState.Dispatched:
-		return 'Serv'
+		return languageData['staff_state.dispatched.short']
 	case StaffState.Inactive:
-		return 'Inat'
+		return languageData['staff_state.inactive.short']
 	case StaffState.SickLeave:
-		return 'Baixa'
+		return languageData['staff_state.sick_leave.short']
 	case StaffState.Unavailable:
-		return 'F/Serv'
+		return languageData['staff_state.unavailable.short']
 	default:
 		return ''
 	}

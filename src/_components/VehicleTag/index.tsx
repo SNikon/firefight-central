@@ -4,38 +4,40 @@ import { VehicleState } from '../../_consts/native'
 import { defaultToNbSp } from '../../_utils/defaultToNbsp'
 import { getTagClassForStates } from '../../_utils/tagStyle'
 import { vehicleStateToShortLocale } from '../../_utils/vehicleStateToLocale'
+import { useLanguageStore } from '../../_state/lang'
 
 type VehicleTagProps = {
-	index: number
-	internalId: string
-	label: string
-	onClick?: (internalId: string) => void
-	selected?: boolean
-	state: VehicleState
+  index: number
+  internalId: string
+  label: string
+  onClick?: (internalId: string) => void
+  selected?: boolean
+  state: VehicleState
 }
 
-export const VehicleTag: FunctionComponent<VehicleTagProps> = props => {
+export const VehicleTag: FunctionComponent<VehicleTagProps> = (props) => {
+	const { languageData } = useLanguageStore()
+
 	const stateClassName = classNames(
 		'rounded-r-3xl flex-1 px-2 py-1 truncate',
-		getTagClassForStates(props.state, props.selected || false))
+		getTagClassForStates(props.state, props.selected || false)
+	)
 
 	const onLocalClick = () => {
 		props.onClick?.(props.internalId)
 	}
 
-	const onFocus: FocusEventHandler<HTMLElement> = evt => {
-		evt.target.scrollIntoView({ behavior: 'smooth', block: 'nearest'})
+	const onFocus: FocusEventHandler<HTMLElement> = (evt) => {
+		evt.target.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
 	}
 
 	return (
-		<button className='w-full text-lg font-bold flex flex-row' onClick={onLocalClick} onFocus={onFocus}>
-			<label className='bg-button text-primary rounded-l-3xl w-24 px-2 py-1 truncate text-right'>
+		<button className="w-full text-lg font-bold flex flex-row" onClick={onLocalClick} onFocus={onFocus}>
+			<label className="bg-button text-primary rounded-l-3xl w-24 px-2 py-1 truncate text-right">
 				{defaultToNbSp(props.label)}
 			</label>
 
-			<label className={stateClassName}>
-				{defaultToNbSp(vehicleStateToShortLocale(props.state))}
-			</label>
+			<label className={stateClassName}>{defaultToNbSp(vehicleStateToShortLocale(props.state, languageData))}</label>
 		</button>
 	)
 }

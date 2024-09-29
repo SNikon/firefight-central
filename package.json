@@ -1,7 +1,7 @@
 {
   "name": "torii-firefighter",
   "private": true,
-  "version": "1.10.0",
+  "version": "1.10.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -20,7 +20,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-use": "^17.5.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "zustand": "^5.0.0-rc.2"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^1.5.4",

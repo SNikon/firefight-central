@@ -3,6 +3,7 @@ import { type MouseEventHandler } from 'react'
 import { Button } from '../../../_components/Button'
 import { View, activeView$, changeView$, openSettings$ } from '../../../_state/view'
 import { Header, HeaderSection } from '../../../_components/Header'
+import { useLanguageStore } from '../../../_state/lang'
 
 const onOverview = () => {
 	changeView$.next(View.Overview)
@@ -29,28 +30,29 @@ const onSettings: MouseEventHandler = ({ clientX, clientY }) => {
 }
 
 export const ApplicationHeader = () => {
+	const { languageData } = useLanguageStore()
 	const viewMode = useObservable(activeView$)
 
 	return (
 		<Header className="bg-backgroundEmphasis">
 			<HeaderSection>
 				<Button active={viewMode === View.Overview} onClick={onOverview}>
-					Geral
+					{languageData['header.overview']}
 				</Button>
 				<Button active={viewMode === View.ManageVehicles} onClick={onManageVehicles}>
-					Veículos
+					{languageData['header.manage_vehicles']}
 				</Button>
 				<Button active={viewMode === View.ManageStaff} onClick={onManageStaff}>
-					Pessoal
+					{languageData['header.manage_staff']}
 				</Button>
 				<Button active={viewMode === View.ManageTeams} disabled onClick={onManageTeams}>
-					Equipas
+					{languageData['header.manage_teams']}
 				</Button>
 			</HeaderSection>
 
 			<HeaderSection>
-				<Button onClick={onManagement}>Gestão</Button>
-				<Button onClick={onSettings}>Configurações</Button>
+				<Button onClick={onManagement}>{languageData['header.management']}</Button>
+				<Button onClick={onSettings}>{languageData['header.settings']}</Button>
 			</HeaderSection>
 		</Header>
 	)

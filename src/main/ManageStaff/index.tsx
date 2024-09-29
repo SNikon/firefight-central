@@ -9,8 +9,11 @@ import { Modal } from '../../_components/Modal'
 import { Scrollable } from '../../_components/Scrollable'
 import { staffSortByLabel } from '../../_utils/staffSort'
 import { StaffPanel } from '../_components/StaffPanel'
+import { useLanguageStore } from '../../_state/lang'
 
 export const ManageStaff = () => {
+	const { languageData } = useLanguageStore()
+
 	const staffMap = useObservable(staff$, {})
 	const staff = useMemo(() => {
 		const entries = Object.values(staffMap)
@@ -33,15 +36,15 @@ export const ManageStaff = () => {
 	}
 
 	return (
-		<div className='bg-body-background text-body-text flex flex-1 flex-col overflow-hidden select-none'>
+		<div className="bg-body-background text-body-text flex flex-1 flex-col overflow-hidden select-none">
 			<Header>
 				<div />
-				<Button onClick={onCreate}>Novo bombeiro</Button>
+				<Button onClick={onCreate}>{languageData['manage_staff.new_staff']}</Button>
 			</Header>
 
-			<Scrollable className='pb-10'>
+			<Scrollable className="pb-10">
 				<CardGrid>
-					{staff.map(staff => (
+					{staff.map((staff) => (
 						<StaffCard
 							key={staff.internalId}
 							label={staff.label}
@@ -55,7 +58,11 @@ export const ManageStaff = () => {
 				</CardGrid>
 			</Scrollable>
 
-			{showForm && <Modal><StaffPanel internalId={selectedId} onClose={closeForm} /></Modal>}
+			{showForm && (
+				<Modal>
+					<StaffPanel internalId={selectedId} onClose={closeForm} />
+				</Modal>
+			)}
 		</div>
 	)
 }

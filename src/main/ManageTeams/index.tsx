@@ -9,8 +9,11 @@ import { CardGrid } from '../../_components/CardGrid'
 import { Modal } from '../../_components/Modal'
 import { TeamCard } from '../../_components/TeamCard'
 import { TeamPanel } from '../_components/TeamPanel'
+import { useLanguageStore } from '../../_state/lang'
 
 export const ManageTeams = () => {
+	const { languageData } = useLanguageStore()
+
 	const teamsMap = useObservable(teams$, {})
 	const teams = useMemo(() => {
 		const entries = Object.values(teamsMap)
@@ -33,15 +36,15 @@ export const ManageTeams = () => {
 	}
 
 	return (
-		<div className='bg-body-background text-body-text flex flex-1 flex-col overflow-hidden select-none'>
+		<div className="bg-body-background text-body-text flex flex-1 flex-col overflow-hidden select-none">
 			<Header>
 				<div />
-				<Button onClick={onCreate}>Nova Equipa</Button>
+				<Button onClick={onCreate}>{languageData['manage_teams.new_team']}</Button>
 			</Header>
 
-			<Scrollable className='pb-10'>
+			<Scrollable className="pb-10">
 				<CardGrid>
-					{teams.map(team => (
+					{teams.map((team) => (
 						<TeamCard
 							key={team.internalId}
 							label={team.label}
@@ -53,7 +56,11 @@ export const ManageTeams = () => {
 				</CardGrid>
 			</Scrollable>
 
-			{showForm && <Modal><TeamPanel internalId={selectedId} onClose={closeForm} /></Modal>}
+			{showForm && (
+				<Modal>
+					<TeamPanel internalId={selectedId} onClose={closeForm} />
+				</Modal>
+			)}
 		</div>
 	)
-}	
+}

@@ -1,15 +1,16 @@
 import { StaffPermission } from '../_consts/native'
+import { LanguagePack } from '../_state/lang'
 
-export const staffPermissionToLocale = (permission: StaffPermission) => {
+export const staffPermissionToLocale = (permission: StaffPermission, languageData: LanguagePack) => {
 	switch (permission) {
 	case StaffPermission.All:
-		return 'Todas as informações'
+		return languageData['access_permissions.all']
 	case StaffPermission.Shift:
-		return 'Relativos ao turno'
+		return languageData['access_permissions.shift']
 	case StaffPermission.Own:
-		return 'Próprias ocorrências'
+		return languageData['access_permissions.own']
 	case StaffPermission.None:
 	default:
-		return 'Sem acesso'
+		return languageData['access_permissions.none']
 	}
 }

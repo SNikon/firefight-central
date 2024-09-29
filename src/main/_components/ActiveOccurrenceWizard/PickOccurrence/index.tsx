@@ -7,15 +7,23 @@ import { Button } from '../../../../_components/Button'
 import { occurrences$ } from '../../../../_state/store'
 import { OccurrenceCard } from '../../../../_components/OccurrenceCard'
 import { occurrenceSortByLabel } from '../../../../_utils/occurrenceSort'
+import { useLanguageStore } from '../../../../_state/lang'
 
 type PickOccurrenceProps = {
-	initialValue: string
-	onCancel: () => void
-	onNext: (value: string) => void
-	onPrevious: () => void
+  initialValue: string
+  onCancel: () => void
+  onNext: (value: string) => void
+  onPrevious: () => void
 }
 
-export const PickOccurrence: FunctionComponent<PickOccurrenceProps> = ({ initialValue, onCancel, onNext, onPrevious }) => {
+export const PickOccurrence: FunctionComponent<PickOccurrenceProps> = ({
+	initialValue,
+	onCancel,
+	onNext,
+	onPrevious
+}) => {
+	const { languageData } = useLanguageStore()
+
 	const occurrences = useObservable(occurrences$, {})
 	const sortedOccurrences = useMemo(() => {
 		const entries = Object.values(occurrences)
@@ -24,21 +32,20 @@ export const PickOccurrence: FunctionComponent<PickOccurrenceProps> = ({ initial
 	}, [occurrences])
 
 	return (
-		<div className='w-full text-action flex flex-col overflow-hidden'>
-			
+		<div className="w-full text-action flex flex-col overflow-hidden">
 			<Header className="px-0 pt-0 mb-5">
 				<HeaderSection>
-					<Button onClick={onCancel}>Cancelar</Button>
+					<Button onClick={onCancel}>{languageData['terms.cancel']}</Button>
 				</HeaderSection>
-				
+
 				<HeaderSection>
-					{onPrevious && <Button onClick={onPrevious}>Voltar</Button>}
+					{onPrevious && <Button onClick={onPrevious}>{languageData['terms.back']}</Button>}
 				</HeaderSection>
 			</Header>
 
 			<Scrollable>
 				<CardGrid>
-					{sortedOccurrences.map(occurrence => (
+					{sortedOccurrences.map((occurrence) => (
 						<OccurrenceCard
 							key={occurrence.internalId}
 							internalId={occurrence.internalId}

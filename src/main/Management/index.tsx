@@ -15,6 +15,7 @@ import { occurrences$, updateOccurrence$ } from '../../_state/store'
 import { Occurrence } from '../../_consts/native'
 import { Button } from '../../_components/Button'
 import { Modal } from '../../_components/Modal'
+import { useLanguageStore } from '../../_state/lang'
 import { DeleteOccurrenceButton } from './DeleteOcurrenceButton'
 import { OcurrenceTypePanel } from './OcurrenceTypePanel'
 
@@ -37,6 +38,8 @@ const occurrenceColumnDefs: Array<ColDef> = [
 ]
 
 export const Management = () => {
+	const { languageData } = useLanguageStore()
+
 	const ocurrences = useObservable(occurrences$, {})
 	const rowData = useMemo(() => Object.values(ocurrences), [ocurrences])
 
@@ -52,7 +55,7 @@ export const Management = () => {
 		<div className="bg-body-background text-body-text flex flex-1 flex-col overflow-hidden select-none">
 			<Header>
 				<div />
-				<Button onClick={onCreate}>Novo tipo de ocorrência</Button>
+				<Button onClick={onCreate}>{languageData['manage_occurrences.new_occurrence_type']}</Button>
 			</Header>
 
 			<div className="ag-theme-quartz flex-1 p-5 pt-0">

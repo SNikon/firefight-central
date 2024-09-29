@@ -5,20 +5,20 @@ import { Team, type ActiveOccurrence, type Occurrence, type Staff, type Vehicle 
 import { bindBulkUpdater$, bindCreator$, bindDeleter$, bindUpdater$ } from './store.impl'
 
 export type State = {
-	activeOccurrences: Record<string, ActiveOccurrence>
-	occurrences: Record<string, Occurrence>
-	staff: Record<string, Staff>
-	teams: Record<string, Team>
-	vehicles: Record<string, Vehicle>
+  activeOccurrences: Record<string, ActiveOccurrence>
+  occurrences: Record<string, Occurrence>
+  staff: Record<string, Staff>
+  teams: Record<string, Team>
+  vehicles: Record<string, Vehicle>
 }
 
 export const store$ = new ReplaySubject<State>(1)
 
 invoke('get_store')
-	.then(state => {
+	.then((state) => {
 		store$.next(state as State)
 	})
-	.catch(err => {
+	.catch((err) => {
 		console.error('Failed to load state', err)
 	})
 
@@ -70,12 +70,23 @@ bindDeleter$(deleteTeam$, updatingState$, 'delete_team', 'teamId')
 export const deleteVehicle$ = new Subject<string>()
 bindDeleter$(deleteVehicle$, updatingState$, 'delete_vehicle', 'vehicleId')
 
-export const activeOccurrences$ = store$.pipe(map(state => state.activeOccurrences), distinctUntilChanged())
-export const occurrences$ = store$.pipe(map(state => state.occurrences), distinctUntilChanged())
-export const staff$ = store$.pipe(map(state => state.staff), distinctUntilChanged())
-export const teams$ = store$.pipe(map(state => state.teams), distinctUntilChanged())
-export const vehicles$ = store$.pipe(map(state => state.vehicles), distinctUntilChanged())
-
-teams$.subscribe(teams => {
-	console.log('Teams', teams)
-})
+export const activeOccurrences$ = store$.pipe(
+	map((state) => state.activeOccurrences),
+	distinctUntilChanged()
+)
+export const occurrences$ = store$.pipe(
+	map((state) => state.occurrences),
+	distinctUntilChanged()
+)
+export const staff$ = store$.pipe(
+	map((state) => state.staff),
+	distinctUntilChanged()
+)
+export const teams$ = store$.pipe(
+	map((state) => state.teams),
+	distinctUntilChanged()
+)
+export const vehicles$ = store$.pipe(
+	map((state) => state.vehicles),
+	distinctUntilChanged()
+)

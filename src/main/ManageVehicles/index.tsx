@@ -9,8 +9,11 @@ import { Modal } from '../../_components/Modal'
 import { Scrollable } from '../../_components/Scrollable'
 import { vehicleSortByLabel } from '../../_utils/vehicleSort'
 import { VehiclePanel } from '../_components/VehiclePanel'
+import { useLanguageStore } from '../../_state/lang'
 
 export const ManageVehicles = () => {
+	const { languageData } = useLanguageStore()
+
 	const vehicleMap = useObservable(vehicles$, {})
 	const vehicles = useMemo(() => {
 		const entries = Object.values(vehicleMap)
@@ -33,15 +36,15 @@ export const ManageVehicles = () => {
 	}
 
 	return (
-		<div className='bg-body-background text-body-text flex flex-1 flex-col overflow-hidden select-none'>
+		<div className="bg-body-background text-body-text flex flex-1 flex-col overflow-hidden select-none">
 			<Header>
 				<div />
-				<Button onClick={onCreate}>Novo veículo</Button>
+				<Button onClick={onCreate}>{languageData['manage_vehicles.new_vehicle']}</Button>
 			</Header>
 
-			<Scrollable className='pb-10'>
+			<Scrollable className="pb-10">
 				<CardGrid>
-					{vehicles.map(vehicle => (
+					{vehicles.map((vehicle) => (
 						<VehicleCard
 							key={vehicle.internalId}
 							label={vehicle.label}
@@ -54,7 +57,11 @@ export const ManageVehicles = () => {
 				</CardGrid>
 			</Scrollable>
 
-			{showForm && <Modal><VehiclePanel internalId={selectedId} onClose={closeForm} /></Modal>}
+			{showForm && (
+				<Modal>
+					<VehiclePanel internalId={selectedId} onClose={closeForm} />
+				</Modal>
+			)}
 		</div>
 	)
 }

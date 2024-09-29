@@ -1,5 +1,6 @@
 use anyhow::Context;
-use std::collections::HashMap;
+use serde_json::json;
+use std::{borrow::Borrow, collections::HashMap};
 use tauri::AppHandle;
 use tauri_plugin_store::StoreBuilder;
 
@@ -1050,8 +1051,9 @@ impl FirefightDataManager for LocalStore {
 
         let teams_value = self
             .get("teams")
-            .with_context(|| "Unable to read teams from store".to_string())?
-            .clone();
+            .map(|teams| teams.clone())
+            .unwrap_or_else(|| json!({}));
+        
         let mut teams_store = serde_json::from_value::<HashMap<String, Team>>(teams_value)
             .with_context(|| "Failed to deserialize teams".to_string())?;
 

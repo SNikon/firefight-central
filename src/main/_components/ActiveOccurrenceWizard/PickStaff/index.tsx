@@ -6,17 +6,18 @@ import { staffSortByOccurrenceState } from '../../../../_utils/staffSort'
 import { Staff, StaffState } from '../../../../_consts/native'
 import { TagGrid } from '../../../../_components/TagGrid'
 import { StaffTag } from '../../../../_components/StaffTag'
+import { useLanguageStore } from '../../../../_state/lang'
 
 type PickStaffProps = {
-	alreadySelectedStaffIds: string[]
-	capacity?: number
-	initialValue: string[]
-	onCancel: () => void
-	onNext: (vehicleId: string, staff: string[]) => void
-	onPrevious: () => void
-	staff: Record<string, Staff>
-	vehicleId: string
-	vehicleLabel: string
+  alreadySelectedStaffIds: string[]
+  capacity?: number
+  initialValue: string[]
+  onCancel: () => void
+  onNext: (vehicleId: string, staff: string[]) => void
+  onPrevious: () => void
+  staff: Record<string, Staff>
+  vehicleId: string
+  vehicleLabel: string
 }
 
 export const PickStaff: FunctionComponent<PickStaffProps> = ({
@@ -30,8 +31,14 @@ export const PickStaff: FunctionComponent<PickStaffProps> = ({
 	vehicleId,
 	vehicleLabel
 }) => {
+	const { languageData } = useLanguageStore()
+
 	const sortedStaff = useMemo(() => {
-		const entries = Object.values(staff).filter(staff => !alreadySelectedStaffIds.includes(staff.internalId) && (staff.state === StaffState.Available || staff.state === StaffState.Dispatched))
+		const entries = Object.values(staff).filter(
+			(staff) =>
+				!alreadySelectedStaffIds.includes(staff.internalId) &&
+        (staff.state === StaffState.Available || staff.state === StaffState.Dispatched)
+		)
 		entries.sort(staffSortByOccurrenceState)
 		return entries
 	}, [alreadySelectedStaffIds, staff])
@@ -40,7 +47,7 @@ export const PickStaff: FunctionComponent<PickStaffProps> = ({
 	useEffect(() => setSelected(initialValue), [initialValue])
 
 	const onSelect = (vehicleId: string) => {
-		setSelected(prevSelected => {
+		setSelected((prevSelected) => {
 			const foundIdx = prevSelected.indexOf(vehicleId)
 			if (foundIdx >= 0) {
 				const nextSelected = prevSelected.slice()
@@ -53,20 +60,20 @@ export const PickStaff: FunctionComponent<PickStaffProps> = ({
 	}
 
 	return (
-		<div className='w-full text-action flex flex-col overflow-hidden'>
+		<div className="w-full text-action flex flex-col overflow-hidden">
 			<Header className="px-0 pt-0 mb-5">
 				<HeaderSection>
-					<Button onClick={onCancel}>Cancelar</Button>
+					<Button onClick={onCancel}>{languageData['terms.cancel']}</Button>
 				</HeaderSection>
 
 				<label className="h-full text-lg font-bold">
-					Guarnição para {vehicleLabel}
+					{languageData['occurrence_wizard.detail_for']} {vehicleLabel}
 					{capacity && ` (${selected.length}/${capacity})`}
 				</label>
-				
+
 				<HeaderSection>
-					{onPrevious && <Button onClick={onPrevious}>Voltar</Button>}
-					<Button onClick={onNext.bind(null, vehicleId, selected)}>Seguinte</Button>
+					{onPrevious && <Button onClick={onPrevious}>{languageData['terms.back']}</Button>}
+					<Button onClick={onNext.bind(null, vehicleId, selected)}>{languageData['terms.next']}</Button>
 				</HeaderSection>
 			</Header>
 

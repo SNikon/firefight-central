@@ -1,28 +1,28 @@
 import { StaffRank } from '../_consts/native'
+import { LanguagePack } from '../_state/lang'
 
-export const staffRankToLocale = (rank: StaffRank) => {
+export const staffRankToLocale = (rank: StaffRank, languageData: LanguagePack) => {
 	switch (rank) {
 	case StaffRank.Rank0:
-		return 'Comandante'
+		return languageData['staff_rank.rank0']
 	case StaffRank.Rank1:
-		return 'Segundo comandante'
+		return languageData['staff_rank.rank1']
 	case StaffRank.Rank2:
-		return 'Adjunto de Comando'
+		return languageData['staff_rank.rank2']
 	case StaffRank.Rank3:
-		return 'Chefe'
+		return languageData['staff_rank.rank3']
 	case StaffRank.Rank4:
-		return 'Subchefe'
+		return languageData['staff_rank.rank4']
 	case StaffRank.Rank5:
-		return 'Bombeiro 1º'
+		return languageData['staff_rank.rank5']
 	case StaffRank.Rank6:
-		return 'Bombeiro 2º'
+		return languageData['staff_rank.rank6']
 	case StaffRank.Rank7:
-		return 'Bombeiro 3º'
+		return languageData['staff_rank.rank7']
 	case StaffRank.Rank8:
-		return 'Estagiário'
+		return languageData['staff_rank.rank8']
 	case StaffRank.Unknown:
 	default:
-		return 'Nao definido'
+		return languageData['terms.not_defined']
 	}
-
 }
