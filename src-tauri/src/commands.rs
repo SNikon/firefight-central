@@ -652,7 +652,6 @@ pub fn open_fvp(app_handle: AppHandle) -> Result<(), String> {
     .maximized(true)
     .minimizable(true)
     .resizable(true)
-    .transparent(false)
     .build()
     {
         return Err(err.to_string());
@@ -691,7 +690,6 @@ pub fn open_settings(app_handle: AppHandle, left: f64, top: f64) -> Result<(), S
     .minimizable(false)
     .maximizable(false)
     .resizable(false)
-    .transparent(false)
     .build()
     {
         return Err(err.to_string());
